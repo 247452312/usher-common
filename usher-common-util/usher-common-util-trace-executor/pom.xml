@@ -10,7 +10,7 @@
     <description>
         可跨域的线程池和threadLocal
     </description>
-    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-util/usher-common-util-trace-executor</url>
+    <url>https://github.com/247452312/usher-common/tree/master/usher-common-util/usher-common-util-trace-executor</url>
     <parent>
         <artifactId>usher-common-util</artifactId>
         <groupId>top.uhyils.usher</groupId>

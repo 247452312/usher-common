@@ -12,7 +12,7 @@
     <description>
         协议相关包
     </description>
-    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-protocol</url>
+    <url>https://github.com/247452312/usher-common/tree/master/usher-common-protocol</url>
     <artifactId>usher-common-protocol</artifactId>
     <packaging>pom</packaging>
     <modules>

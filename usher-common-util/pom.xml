@@ -14,7 +14,7 @@
     <description>
         usher工具包
     </description>
-    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-util</url>
+    <url>https://github.com/247452312/usher-common/tree/master/usher-common-util</url>
     <modules>
         <module>usher-common-util-obj-pool</module>
         <module>usher-common-util-trace-executor</module>

@@ -15,7 +15,7 @@
     <description>
         实例池工具
     </description>
-    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-util/usher-common-util-obj-pool</url>
+    <url>https://github.com/247452312/usher-common/tree/master/usher-common-util/usher-common-util-obj-pool</url>
 
     <parent>
         <groupId>top.uhyils.usher</groupId>

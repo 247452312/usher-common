@@ -171,7 +171,7 @@
         <artifactId>usher-common</artifactId>
         <version>2.1.0.4.usher-SNAPSHOT</version>
     </parent>
-    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-rpc</url>
+    <url>https://github.com/247452312/usher-common/tree/master/usher-common-rpc</url>
 
     <modules>
         <module>usher-common-rpc-exchange</module>

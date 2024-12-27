@@ -12,7 +12,7 @@
     <description>
         数据操作支持
     </description>
-    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-data</url>
+    <url>https://github.com/247452312/usher-common/tree/master/usher-common-data</url>
     <artifactId>usher-common-data</artifactId>
     <packaging>pom</packaging>
     <modules>

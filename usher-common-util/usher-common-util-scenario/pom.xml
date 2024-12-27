@@ -10,7 +10,7 @@
     <description>
         情景识别尝试(报用,临时不要用)
     </description>
-    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-util/usher-common-util-scenario</url>
+    <url>https://github.com/247452312/usher-common/tree/master/usher-common-util/usher-common-util-scenario</url>
     <parent>
         <groupId>top.uhyils.usher</groupId>
         <artifactId>usher-common-util</artifactId>

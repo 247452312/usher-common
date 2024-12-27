@@ -11,7 +11,7 @@
     <description>
         优雅上下线模块
     </description>
-    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-elegant</url>
+    <url>https://github.com/247452312/usher-common/tree/master/usher-common-elegant</url>
     <parent>
         <artifactId>usher-common</artifactId>
         <groupId>top.uhyils.usher</groupId>
