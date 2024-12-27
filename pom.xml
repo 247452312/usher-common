@@ -6,7 +6,7 @@
 
     <groupId>top.uhyils.usher</groupId>
     <artifactId>usher-common</artifactId>
-    <version>2.1.0.4.usher-SNAPSHOT</version>
+    <version>2.1.0.4.usher</version>
     <packaging>pom</packaging>
     <modules>
         <module>usher-common-base</module>
@@ -717,7 +717,7 @@
     <description>
         usher公共包
     </description>
-    <url>https://github.com/247452312/usher-common/tree/master</url>
+    <url>https://github.com/247452312/usher-common</url>
     <!-- profile配置 -->
     <distributionManagement>
         <snapshotRepository>
