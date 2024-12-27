@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>top.uhyils.usher</groupId>
+        <artifactId>usher-common</artifactId>
+        <version>2.1.0.4.usher-SNAPSHOT</version>
+    </parent>
+    <packaging>pom</packaging>
+    <artifactId>usher-common-util</artifactId>
+
+    <description>
+        usher工具包
+    </description>
+    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common/usher-common-util</url>
+    <modules>
+        <module>usher-common-util-obj-pool</module>
+        <module>usher-common-util-trace-executor</module>
+        <module>usher-common-util-scenario</module>
+        <module>usher-common-util-ustream</module>
+        <module>usher-common-util-thread-sync</module>
+    </modules>
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>

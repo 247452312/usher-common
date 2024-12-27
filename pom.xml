@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>top.uhyils.usher</groupId>
+    <artifactId>usher-common</artifactId>
+    <version>2.1.0.4.usher-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>usher-common-base</module>
+        <module>usher-common-util</module>
+        <module>usher-common-rpc</module>
+        <module>usher-common-protocol</module>
+        <module>usher-common-event-bus</module>
+        <module>usher-common-data</module>
+        <module>usher-common-mq</module>
+        <module>usher-common-log</module>
+        <module>usher-common-hot-spot</module>
+        <module>usher-common-elegant</module>
+    </modules>
+
+    <!--项目开发者列表-->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <spring-boot.version>2.6.1</spring-boot.version>
+        <spring.version>5.3.13</spring.version>
+        <spring-cloud-common.version>2.1.1.RELEASE</spring-cloud-common.version>
+        <swagger2.version>3.0.0</swagger2.version>
+        <!--        <org.dubbo.version>2.7.3</org.dubbo.version>-->
+        <druid.version>1.1.22</druid.version>
+        <maven.compiler.plugin.version>3.10.0</maven.compiler.plugin.version>
+        <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+        <!--        <org.apache.dubbo.nacos.version>1.2.1</org.apache.dubbo.nacos.version>-->
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <fastjson.version>1.2.69</fastjson.version>
+        <slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
+        <zookeeper.version>3.6.0</zookeeper.version>
+        <zk-client.version>0.11</zk-client.version>
+        <curator.version>4.3.0</curator.version>
+        <mybatis.version>3.5.6</mybatis.version>
+        <mybatis.spring.version>2.0.4</mybatis.spring.version>
+        <mybatis.spring-boot.version>2.1.2</mybatis.spring-boot.version>
+        <mysql.version>8.0.19</mysql.version>
+        <jackson.version>2.10.3</jackson.version>
+        <commons-logging.version>1.2</commons-logging.version>
+        <commons-net.version>3.6</commons-net.version>
+        <powermock.version>2.0.2</powermock.version>
+        <mockito.version>2.23.4</mockito.version>
+        <jedis.version>3.2.0</jedis.version>
+        <distrupter.version>3.4.2</distrupter.version>
+        <ssh2.version>262</ssh2.version>
+        <rabbitmq-client.version>5.7.3</rabbitmq-client.version>
+        <quartz.version>2.3.2</quartz.version>
+        <hutool.version>5.3.8</hutool.version>
+        <mail.version>1.4.7</mail.version>
+        <mongo.version>3.12.5</mongo.version>
+        <nacos.version>2.4.3</nacos.version>
+        <velocity.version>2.3</velocity.version>
+        <httpclient.version>4.5.13</httpclient.version>
+        <httpcore.version>4.4.13</httpcore.version>
+        <javax.validation.version>2.0.1.Final</javax.validation.version>
+        <tencentcloud.version>3.1.99</tencentcloud.version>
+        <poi.version>5.3.0</poi.version>
+        <asr.version>1.0</asr.version>
+        <sentinel.version>1.8.4</sentinel.version>
+        <es.version>7.9.1</es.version>
+        <netty.version>4.1.54.Final</netty.version>
+        <flink.version>1.13.1</flink.version>
+        <asm.version>9.2</asm.version>
+        <javaparser.version>3.24.2</javaparser.version>
+        <mybatis.plus.spring.version>3.4.3.3</mybatis.plus.spring.version>
+        <mapStruct.version>1.6.2</mapStruct.version>
+        <ojdbc.version>11.2.0.3</ojdbc.version>
+        <rocketmq.version>5.3.1</rocketmq.version>
+        <jython.version>2.7.2</jython.version>
+        <javassist.version>3.24.0-GA</javassist.version>
+        <kotlin.version>1.6.20-RC</kotlin.version>
+        <math3.version>3.6.1</math3.version>
+        <commons-io.version>2.11.0</commons-io.version>
+        <manifold.version>2024.1.35</manifold.version>
+        <nacos.config.spring.version>0.3.0-RC</nacos.config.spring.version>
+        <ql.version>3.3.4</ql.version>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-base</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-data-es</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-data-redis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-data-mongo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-event-bus</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-protocol-mysql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-rpc-spring-start</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-util-obj-pool</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-util-scenario</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-util-trace-executor</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-util-ustream</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-util-thread-sync</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-mq</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-log</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-hot-spot</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-elegant</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+
+
+
+
+
+
+
+            <!-- https://mvnrepository.com/artifact/ch.ethz.ganymed/ganymed-ssh2 -->
+            <dependency>
+                <groupId>ch.ethz.ganymed</groupId>
+                <artifactId>ganymed-ssh2</artifactId>
+                <version>${ssh2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-commons</artifactId>
+                <version>${spring-cloud-common.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <!--引入AOP依赖-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-aop</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+
+            <!-- https://mvnrepository.com/artifact/org.springframework/spring-context-support -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-autoconfigure</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+
+            <!--            &lt;!&ndash;devtools热部署&ndash;&gt;-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework.boot</groupId>-->
+            <!--                <artifactId>spring-boot-devtools</artifactId>-->
+            <!--                <version>${spring-boot.version}</version>-->
+            <!--                <optional>true</optional>-->
+            <!--                <scope>true</scope>-->
+            <!--            </dependency>-->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.boot</groupId>
+                <artifactId>velocity-spring-boot-starter</artifactId>
+                <version>0.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>QLExpress</artifactId>
+                <version>${ql.version}</version>
+            </dependency>
+
+            <!--编译期重载运算符 manifold-->
+            <dependency>
+                <groupId>systems.manifold</groupId>
+                <artifactId>manifold-ext</artifactId>
+                <version>${manifold.version}</version>
+            </dependency>
+
+            <!--asm-->
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+
+            <!-- velocity代码生成使用模板 -->
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity-engine-core</artifactId>
+                <version>${velocity.version}</version>
+            </dependency>
+
+            <!-- es -->
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>${es.version}</version>
+            </dependency>
+            <!-- druid连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
+            <!-- sentinel-core 熔断 -->
+            <dependency>
+                <groupId>com.alibaba.csp</groupId>
+                <artifactId>sentinel-core</artifactId>
+                <version>${sentinel.version}</version>
+            </dependency>
+
+
+            <!-- https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter -->
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis.spring-boot.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis.plus.spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${javax.validation.version}</version>
+            </dependency>
+
+            <!-- 动态定时任务 -->
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>${quartz.version}</version>
+            </dependency>
+
+            <!--spring test-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${swagger2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+            <!--zookeeper-->
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-framework</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>${nacos.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba.boot</groupId>
+                <artifactId>nacos-config-spring-boot-starter</artifactId>
+                <version>${nacos.config.spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba.boot</groupId>
+                <artifactId>nacos-config-spring-boot-actuator</artifactId>
+                <version>${nacos.config.spring.version}</version>
+            </dependency>
+
+
+            <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${jedis.version}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
+            <dependency>
+                <groupId>com.lmax</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>${distrupter.version}</version>
+            </dependency>
+
+            <!-- mongo driver -->
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongo-java-driver</artifactId>
+                <version>${mongo.version}</version>
+            </dependency>
+
+
+            <!--工具包-->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <!--邮件依赖-->
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>mail</artifactId>
+                <version>${mail.version}</version>
+            </dependency>
+
+
+            <!-- httpclient -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <!-- httpcore -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>${httpcore.version}</version>
+            </dependency>
+
+            <!-- tencent cloud-sdk-java -->
+            <dependency>
+                <groupId>com.tencentcloudapi</groupId>
+                <artifactId>tencentcloud-sdk-java</artifactId>
+                <version>${tencentcloud.version}</version>
+            </dependency>
+
+
+            <!-- poi -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+
+            <!-- poi-ooxml -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <!--mapStruct-->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapStruct.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapStruct.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc6</artifactId>
+                <version>${ojdbc.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${rocketmq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-acl</artifactId>
+                <version>${rocketmq.version}</version>
+            </dependency>
+
+            <!-- org.python/jython -->
+            <dependency>
+                <groupId>org.python</groupId>
+                <artifactId>jython-standalone</artifactId>
+                <version>${jython.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>${javassist.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>27.1-jre</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk8</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-test</artifactId>
+                <version>${kotlin.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>${math3.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
+        </license>
+    </licenses>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                    <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>-Xplugin:Manifold no-bootstrap</arg>
+                    </compilerArgs>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>systems.manifold</groupId>
+                            <artifactId>manifold-ext</artifactId>
+                            <version>${manifold.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapStruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <!--class files as source must be available for extension method classes-->
+                            <Contains-Sources>java,class</Contains-Sources>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <configuration>
+                    <!-- 改成你自己的路径 -->
+                    <executable>C:/Program Files (x86)/GnuPG/bin/gpg.exe</executable>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 发布插件 -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.5.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>usher</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                    <!-- 若要自动发布，添加以下配置 -->
+                    <autoPublish>true</autoPublish>
+                    <!-- 一直等到发布完成 -->
+                    <waitUntil>published</waitUntil>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <!--增加一个配置，解决 JDK1.8 环境下发布出现的问题-->
+        <profile>
+            <properties>
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
+            <id>disable-javadoc-doclint</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+        </profile>
+        <profile>
+            <!-- 本地开发环境 -->
+            <properties>
+                <profiles.active>dev</profiles.active>
+            </properties>
+            <!-- 定义该配置的属性 -->
+            <id>dev</id>
+            <activation>
+                <!-- 设置默认激活这个配置 -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <!-- 测试环境 -->
+            <properties>
+                <profiles.active>test</profiles.active>
+            </properties>
+            <!-- 定义该配置的属性 -->
+            <id>test</id>
+        </profile>
+        <profile>
+            <!-- 准生产环境 -->
+            <properties>
+                <profiles.active>release</profiles.active>
+            </properties>
+            <!-- 定义该配置的属性 -->
+            <id>release</id>
+        </profile>
+        <profile>
+            <!-- 生产环境 -->
+            <properties>
+                <profiles.active>prod</profiles.active>
+            </properties>
+            <!-- 定义该配置的属性 -->
+            <id>prod</id>
+        </profile>
+    </profiles>
+
+    <scm>
+        <url>https://gitee.com/opentech_usher/usher</url>
+        <connection>scm:git:git://gitee.com/opentech_usher/usher.git</connection>
+        <developerConnection>scm:git:ssh://gitee.com/opentech_usher/usher.git</developerConnection>
+    </scm>
+
+    <description>
+        usher公共包
+    </description>
+    <url>https://gitee.com/opentech_usher/usher/tree/master/usher-common</url>
+    <!-- profile配置 -->
+    <distributionManagement>
+        <snapshotRepository>
+            <url>https://central.sonatype.com</url>
+            <id>usher</id>
+        </snapshotRepository>
+    </distributionManagement>
+
+
+    <developers>
+        <!--某个项目开发者的信息-->
+        <developer>
+            <!--SCM里项目开发者的唯一标识符-->
+            <name>uhyils</name>
+            <!--项目开发者的全名-->
+            <id>uhyils</id>
+            <!--项目开发者的email-->
+            <email>uhyils@qq.com</email>
+
+            <!--项目开发者所在时区， -11到12范围内的整数。-->
+            <timezone>8</timezone>
+        </developer>
+    </developers>
+</project>
