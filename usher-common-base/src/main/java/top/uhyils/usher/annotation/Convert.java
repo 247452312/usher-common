@@ -5,7 +5,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.springframework.stereotype.Component;
 
 /**
  * 转换器注解
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
  * @date 文件创建日期 2021年08月24日 18时17分
  */
 
-@Component
 @Documented
 @Target(value = {ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

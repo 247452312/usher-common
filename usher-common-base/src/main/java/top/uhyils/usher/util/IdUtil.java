@@ -1,8 +1,7 @@
 package top.uhyils.usher.util;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import top.uhyils.usher.context.UsherContext;
 
 /**
@@ -13,17 +12,26 @@ import top.uhyils.usher.context.UsherContext;
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2020年12月06日 19时27分
  */
-@Component
 public class IdUtil {
+
+    /**
+     * 分布式节点index_key
+     */
+    public static final String SYSTEM_CODE_KEY = "ENTITY_ID_CODE";
+
+    public static final Random RANDOM = new Random();
+
+    private static volatile IdUtil instance;
 
     /**
      * 序列号
      */
     private final AtomicLong sequence = new AtomicLong(0L);
 
-
-    @Value("${id.organization.code:-1}")
-    private Long code;
+    /**
+     * 区别不同应用或者同一应用的不同节点的标识
+     */
+    private final Long code;
 
     /**
      * 存储上一次生成的时间,保证系统时间不正确时不产生错误的id
@@ -31,11 +39,43 @@ public class IdUtil {
     private volatile Long lastTime = 0L;
 
 
-    public synchronized long newId() {
-        return newId(this.code);
+    private IdUtil(Long code) {
+        this.code = code;
     }
 
-    public synchronized long newId(Long code) {
+    public static IdUtil getInstance() {
+        if (instance != null) {
+            return instance;
+        }
+        synchronized (IdUtil.class) {
+            if (instance != null) {
+                return instance;
+            }
+            instance = new IdUtil(Long.valueOf(System.getProperty(SYSTEM_CODE_KEY, Long.toString(RANDOM.nextLong()))));
+            return instance;
+        }
+    }
+
+    public static long newId() {
+        return getInstance().nextId();
+    }
+
+    public static long newId(Long code) {
+        return getInstance().nextId(code);
+    }
+
+    public synchronized long nextId() {
+        return nextId(this.code);
+    }
+
+    /**
+     * 产生下一个分布式唯一编码
+     *
+     * @param code 分布式节点code
+     *
+     * @return
+     */
+    public synchronized long nextId(Long code) {
         if (code == null) {
             code = 1L;
         }
@@ -60,10 +100,7 @@ public class IdUtil {
             }
             return newId();
         }
-        if (code == null) {
-            code = -1L;
-        }
-        // 从配置文件中获取 代表学校码
+        // 从配置文件中获取 代表分布式唯一编码
         long distributedResult = (code & UsherContext.DISTRIBUTED_MASK) << UsherContext.DISTRIBUTED_DISPLACEMENT;
 
         //时间戳

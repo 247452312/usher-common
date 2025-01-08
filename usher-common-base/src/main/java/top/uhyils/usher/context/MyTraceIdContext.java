@@ -9,7 +9,6 @@ import top.uhyils.usher.enums.LogTypeEnum;
 import top.uhyils.usher.util.IdUtil;
 import top.uhyils.usher.util.IpUtil;
 import top.uhyils.usher.util.LogUtil;
-import top.uhyils.usher.util.SpringUtil;
 import top.uhyils.usher.util.SupplierWithException;
 
 /**
@@ -63,7 +62,7 @@ public class MyTraceIdContext {
 
     public static String getProjectName() {
         if (projectName == null) {
-            projectName = SpringUtil.getProperty("rpc.application.name", "NoName");
+            projectName = System.getProperty("rpc.application.name", "NoName");
         }
         return projectName;
     }
@@ -136,11 +135,7 @@ public class MyTraceIdContext {
             }
             synchronized (MyTraceIdContext.class) {
                 if (thraceId.get() == null) {
-                    IdUtil bean = SpringUtil.getBean(IdUtil.class);
-                    if (bean == null) {
-                        bean = new IdUtil();
-                    }
-                    thraceId.set(bean.newId());
+                    thraceId.set(IdUtil.newId());
                 }
             }
         }

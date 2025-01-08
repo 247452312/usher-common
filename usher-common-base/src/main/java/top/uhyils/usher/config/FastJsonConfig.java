@@ -11,16 +11,16 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
-import org.springframework.context.annotation.Configuration;
+import javax.annotation.PostConstruct;
 
 /**
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2021年12月31日 09时35分
  */
-@Configuration
 public class FastJsonConfig {
 
-    static {
+    @PostConstruct
+    public void init() {
         ParserConfig.getGlobalInstance().addAccept("top.uhyils.usher");
         SerializeConfig.getGlobalInstance().put(Optional.class, OptionalSerializer.instance);
     }

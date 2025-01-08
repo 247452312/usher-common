@@ -53,6 +53,13 @@ public interface UStream<T> {
     }
 
     /**
+     * 核心执行 将一个新操作包装到之前的操作之后,也就是最外层
+     *
+     * @param consumer 对流中每个元素的操作
+     */
+    void consume(Consumer<T> consumer);
+
+    /**
      * 将UStream 转换为stream
      *
      * @return
@@ -78,12 +85,6 @@ public interface UStream<T> {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
     }
 
-    /**
-     * 核心执行 将一个新操作包装到之前的操作之后,也就是最外层
-     *
-     * @param consumer 对流中每个元素的操作
-     */
-    void consume(Consumer<T> consumer);
 
     /**
      * 映射
@@ -290,6 +291,392 @@ public interface UStream<T> {
         return t -> consume(e -> t.accept(consumer.apply(e)));
     }
 
+
+    /**
+     * 跳过前N个
+     *
+     * @return
+     */
+    default UStream<T> skip(long n) {
+        return t -> {
+            AtomicInteger index = new AtomicInteger(0);
+            consume(e -> {
+                if (index.get() >= n) {
+                    t.accept(e);
+                }
+                index.incrementAndGet();
+            });
+        };
+    }
+
+    /**
+     * 取前N个
+     *
+     * @return
+     */
+    default UStream<T> limit(long n) {
+        return t -> {
+            AtomicInteger index = new AtomicInteger(0);
+            consumeTillStop(e -> {
+                index.incrementAndGet();
+                if (index.get() <= n) {
+                    t.accept(e);
+                } else {
+                    stop();
+                }
+            });
+        };
+    }
+
+    /**
+     * 并发流
+     *
+     * @return
+     */
+    default UStream<T> parallel() {
+        ForkJoinPool pool = ForkJoinPool.commonPool();
+        return c -> map(t -> pool.submit(() -> c.accept(t))).cache().consume(ForkJoinTask::join);
+    }
+
+
+    /**
+     * 匹配并替换元素
+     *
+     * @param replaceRule   匹配规则
+     * @param targetReplace 替换元素
+     *
+     * @return
+     */
+    default UStream<T> replace(Function<T, Boolean> replaceRule, T targetReplace) {
+        return t -> consume(s -> {
+            if (replaceRule.apply(s)) {
+                t.accept(targetReplace);
+            } else {
+                t.accept(s);
+            }
+        });
+    }
+
+    /**
+     * 匹配并替换元素
+     *
+     * @param replaceRule   匹配规则
+     * @param targetReplace 替换元素
+     *
+     * @return
+     */
+    default UStream<T> replace(BiFunction<Integer, T, Boolean> replaceRule, T targetReplace) {
+        AtomicInteger index = new AtomicInteger(0);
+        return t -> consume(s -> {
+            if (replaceRule.apply(index.getAndIncrement(), s)) {
+                t.accept(targetReplace);
+            } else {
+                t.accept(s);
+            }
+        });
+    }
+
+    /**
+     * 替换元素
+     *
+     * @param replaceRule   匹配元素
+     * @param targetReplace 替换元素
+     *
+     * @return
+     */
+    default UStream<T> replace(T replaceRule, T targetReplace) {
+        return replace(replaceRule::equals, targetReplace);
+    }
+
+    /**
+     * 替换元素
+     *
+     * @param index         开始元素
+     * @param size          大小
+     * @param targetReplace 替换元素
+     *
+     * @return
+     */
+    default UStream<T> replace(int index, int size, T targetReplace) {
+        return replace((i, t) -> i >= index && i < index + size, targetReplace);
+    }
+
+
+    /**
+     * 排序流
+     *
+     * @return
+     */
+    default UStream<T> sorted(Comparator<T> comparator) {
+        return t -> {
+            List<T> list = new ArrayList<>();
+            UStream.this.consume(list::add);
+            list.sort(comparator);
+            list.forEach(t);
+        };
+    }
+
+
+    /**
+     * 部分消费(非终结流)
+     *
+     * @param index         开始消费
+     * @param size          大小
+     * @param finalConsumer 消费逻辑
+     *
+     * @return
+     */
+    default UStream<T> forEach(int index, int size, Consumer<T> finalConsumer) {
+        AtomicInteger indexTemp = new AtomicInteger(0);
+        return t -> consume(s -> {
+            int andIncrement = indexTemp.getAndIncrement();
+            if (andIncrement >= index && andIncrement < index + size) {
+                finalConsumer.accept(s);
+            }
+            t.accept(s);
+        });
+    }
+
+
+    /**
+     * 反向流
+     *
+     * @return
+     */
+    default UStream<T> reverse() {
+        return t -> {
+            List<T> list = new ArrayList<>();
+            UStream.this.consume(list::add);
+            for (int size = list.size() - 1; size >= 0; size--) {
+                t.accept(list.get(size));
+            }
+        };
+    }
+
+
+    /**
+     * 去重流
+     *
+     * @return
+     */
+    default UStream<T> distinct() {
+        return t -> {
+            List<T> temp = new ArrayList<>();
+            consume(e -> {
+                if (!temp.contains(e)) {
+                    temp.add(e);
+                    t.accept(e);
+                }
+            });
+        };
+    }
+
+    /**
+     * 取最大值
+     *
+     * @return
+     */
+    default T max(Comparator<T> comparator) {
+        UObject<T> result = new UObject<>();
+        consume(t -> {
+            T obj = result.get();
+            if (obj == null || comparator.compare(t, obj) > 0) {
+                result.set(t);
+            }
+        });
+        return result.get();
+    }
+
+    /**
+     * 取最小值
+     *
+     * @return
+     */
+    default T min(Comparator<T> comparator) {
+        UObject<T> result = new UObject<>();
+        consume(t -> {
+            T obj = result.get();
+            if (obj == null || comparator.compare(t, obj) < 0) {
+                result.set(t);
+            }
+        });
+        return result.get();
+    }
+
+    /**
+     * 获取流中任意一个元素
+     *
+     * @return
+     */
+    default Optional<T> findAny() {
+        return findFirst();
+    }
+
+    /**
+     * 流元素数量, 注意 这一步结束流不会执行peek等操作
+     *
+     * @return
+     */
+    default int count() {
+        AtomicInteger count = new AtomicInteger();
+        consume(t -> count.incrementAndGet());
+        return count.get();
+    }
+
+
+    default <K, V> Map<K, V> toMap(Function<T, K> keyMap, Function<T, V> valueMap, BiFunction<V, V, V> chose) {
+        Map<K, V> map = new HashMap<>();
+        consume(e -> {
+            K key = keyMap.apply(e);
+            V value = valueMap.apply(e);
+            if (map.containsKey(key)) {
+                V target = chose.apply(map.get(key), value);
+                map.put(key, target);
+            } else {
+                map.put(key, value);
+            }
+        });
+        return map;
+    }
+
+    default <K, V> Map<K, V> toMap(Function<T, K> keyMap, Function<T, V> valueMap) {
+        Map<K, V> map = new HashMap<>();
+        consume(e -> {
+            K key = keyMap.apply(e);
+            V value = valueMap.apply(e);
+            if (map.containsKey(key)) {
+                throw new RuntimeException("错误,ustream toMap时key不能重复");
+            } else {
+                map.put(key, value);
+            }
+        });
+        return map;
+    }
+
+    /**
+     * 分组
+     *
+     * @return
+     */
+    default <E> Map<E, UStream<T>> groupByToUStream(Function<T, E> function) {
+        Map<E, List<UStream<T>>> consumers = new HashMap<>();
+
+        consume(t -> {
+            E key = function.apply(t);
+            if (!consumers.containsKey(key)) {
+                consumers.put(key, new ArrayList<>());
+            }
+            consumers.get(key).add(consumer -> consumer.accept(t));
+        });
+        Map<E, UStream<T>> result = new HashMap<>();
+        for (E key : consumers.keySet()) {
+            List<UStream<T>> uStreams = consumers.get(key);
+            UStream<T> tuStream = UStream.of(uStreams).flatMap(t -> t);
+            result.put(key, tuStream);
+        }
+
+        return result;
+    }
+
+    /**
+     * 结局输出流
+     *
+     * @return
+     */
+    default Object[] toArray() {
+        return toList().toArray();
+    }
+
+    default List<T> toList() {
+        List<T> ts = new ArrayList<>();
+        consume(ts::add);
+        return ts;
+    }
+
+    /**
+     * join
+     *
+     * @param charSequence
+     *
+     * @return
+     */
+    default String join(CharSequence charSequence) {
+        return join(charSequence, T::toString);
+    }
+
+    /**
+     * 分组
+     *
+     * @return
+     */
+    default <E> Map<E, List<T>> groupBy(Function<T, E> comparator) {
+        Map<E, List<T>> result = new HashMap<>();
+        consume(t -> {
+            E key = comparator.apply(t);
+            if (!result.containsKey(key)) {
+                result.put(key, new ArrayList<>());
+            }
+            result.get(key).add(t);
+        });
+        return result;
+    }
+
+    /**
+     * join
+     *
+     * @return
+     */
+    default String join() {
+        return join("", T::toString);
+    }
+
+    /**
+     * join
+     *
+     * @param charSequence
+     *
+     * @return
+     */
+    default String join(CharSequence charSequence, Function<T, String> function) {
+        StringJoiner joiner = new StringJoiner(charSequence);
+        consume(t -> joiner.add(function.apply(t)));
+        return joiner.toString();
+    }
+
+    /**
+     * 将并发流转为顺序流 顺序保持并发前的顺序
+     *
+     * @return
+     */
+    default UStream<T> cache() {
+        List<T> arraySeq = new ArrayList<>();
+        consume(arraySeq::add);
+        return UStream.of(arraySeq);
+    }
+
+    /**
+     * 合并所有元素
+     *
+     * @param function
+     *
+     * @return
+     */
+    default <E> E reduce(E startValue, BiFunction<E, T, E> function) {
+        UObject<E> result = new UObject<>(startValue);
+        consume(t -> result.set(function.apply(result.get(), t)));
+        return result.get();
+    }
+
+    /**
+     * 遍历
+     *
+     * @param finalConsumer
+     */
+    default void forEach(Consumer<T> finalConsumer) {
+        consume(finalConsumer);
+    }
+
+
     /**
      * 获取流中第一个元素
      *
@@ -376,291 +763,4 @@ public interface UStream<T> {
         return result.get();
     }
 
-    /**
-     * 合并所有元素
-     *
-     * @param function
-     *
-     * @return
-     */
-    default <E> E reduce(E startValue, BiFunction<E, T, E> function) {
-        UObject<E> result = new UObject<>(startValue);
-        consume(t -> result.set(function.apply(result.get(), t)));
-        return result.get();
-    }
-
-    /**
-     * 跳过前N个
-     *
-     * @return
-     */
-    default UStream<T> skip(long n) {
-        return t -> {
-            AtomicInteger index = new AtomicInteger(0);
-            consume(e -> {
-                if (index.get() >= n) {
-                    t.accept(e);
-                }
-                index.incrementAndGet();
-            });
-        };
-    }
-
-    /**
-     * 取前N个
-     *
-     * @return
-     */
-    default UStream<T> limit(long n) {
-        return t -> {
-            AtomicInteger index = new AtomicInteger(0);
-            consumeTillStop(e -> {
-                index.incrementAndGet();
-                if (index.get() <= n) {
-                    t.accept(e);
-                } else {
-                    stop();
-                }
-            });
-        };
-    }
-
-    /**
-     * 并发流
-     *
-     * @return
-     */
-    default UStream<T> parallel() {
-        ForkJoinPool pool = ForkJoinPool.commonPool();
-        return c -> map(t -> pool.submit(() -> c.accept(t))).cache().consume(ForkJoinTask::join);
-    }
-
-    /**
-     * 将并发流转为顺序流 顺序保持并发前的顺序
-     *
-     * @return
-     */
-    default UStream<T> cache() {
-        List<T> arraySeq = new ArrayList<>();
-        consume(arraySeq::add);
-        return UStream.of(arraySeq);
-    }
-
-    /**
-     * 取最大值
-     *
-     * @return
-     */
-    default T max(Comparator<T> comparator) {
-        UObject<T> result = new UObject<>();
-        consume(t -> {
-            T obj = result.get();
-            if (obj == null || comparator.compare(t, obj) > 0) {
-                result.set(t);
-            }
-        });
-        return result.get();
-    }
-
-    /**
-     * 取最小值
-     *
-     * @return
-     */
-    default T min(Comparator<T> comparator) {
-        UObject<T> result = new UObject<>();
-        consume(t -> {
-            T obj = result.get();
-            if (obj == null || comparator.compare(t, obj) < 0) {
-                result.set(t);
-            }
-        });
-        return result.get();
-    }
-
-    /**
-     * 排序流
-     *
-     * @return
-     */
-    default UStream<T> sorted(Comparator<T> comparator) {
-        return t -> {
-            List<T> list = new ArrayList<>();
-            UStream.this.consume(list::add);
-            list.sort(comparator);
-            list.forEach(t);
-        };
-    }
-
-    /**
-     * 分组
-     *
-     * @return
-     */
-    default <E> Map<E, List<T>> groupBy(Function<T, E> comparator) {
-        Map<E, List<T>> result = new HashMap<>();
-        consume(t -> {
-            E key = comparator.apply(t);
-            if (!result.containsKey(key)) {
-                result.put(key, new ArrayList<>());
-            }
-            result.get(key).add(t);
-        });
-        return result;
-    }
-
-    /**
-     * 分组
-     *
-     * @return
-     */
-    default <E> Map<E, UStream<T>> groupByToUStream(Function<T, E> function) {
-        Map<E, List<UStream<T>>> consumers = new HashMap<>();
-
-        consume(t -> {
-            E key = function.apply(t);
-            if (!consumers.containsKey(key)) {
-                consumers.put(key, new ArrayList<>());
-            }
-            consumers.get(key).add(consumer -> consumer.accept(t));
-        });
-        Map<E, UStream<T>> result = new HashMap<>();
-        for (E key : consumers.keySet()) {
-            List<UStream<T>> uStreams = consumers.get(key);
-            UStream<T> tuStream = UStream.of(uStreams).flatMap(t -> t);
-            result.put(key, tuStream);
-        }
-
-        return result;
-    }
-
-
-    /**
-     * 反向流
-     *
-     * @return
-     */
-    default UStream<T> reverse() {
-        return t -> {
-            List<T> list = new ArrayList<>();
-            UStream.this.consume(list::add);
-            for (int size = list.size() - 1; size >= 0; size--) {
-                t.accept(list.get(size));
-            }
-        };
-    }
-
-    /**
-     * 结局输出流
-     *
-     * @return
-     */
-    default Object[] toArray() {
-        return toList().toArray();
-    }
-
-    /**
-     * 去重流
-     *
-     * @return
-     */
-    default UStream<T> distinct() {
-        return t -> {
-            List<T> temp = new ArrayList<>();
-            consume(e -> {
-                if (!temp.contains(e)) {
-                    temp.add(e);
-                    t.accept(e);
-                }
-            });
-        };
-    }
-
-    /**
-     * 获取流中任意一个元素
-     *
-     * @return
-     */
-    default Optional<T> findAny() {
-        return findFirst();
-    }
-
-    /**
-     * 流元素数量, 注意 这一步结束流不会执行peek等操作
-     *
-     * @return
-     */
-    default int count() {
-        AtomicInteger count = new AtomicInteger();
-        consume(t -> count.incrementAndGet());
-        return count.get();
-    }
-
-    default List<T> toList() {
-        List<T> ts = new ArrayList<>();
-        consume(ts::add);
-        return ts;
-    }
-
-    default <K, V> Map<K, V> toMap(Function<T, K> keyMap, Function<T, V> valueMap, BiFunction<V, V, V> chose) {
-        Map<K, V> map = new HashMap<>();
-        consume(e -> {
-            K key = keyMap.apply(e);
-            V value = valueMap.apply(e);
-            if (map.containsKey(key)) {
-                V target = chose.apply(map.get(key), value);
-                map.put(key, target);
-            } else {
-                map.put(key, value);
-            }
-        });
-        return map;
-    }
-
-    default <K, V> Map<K, V> toMap(Function<T, K> keyMap, Function<T, V> valueMap) {
-        Map<K, V> map = new HashMap<>();
-        consume(e -> {
-            K key = keyMap.apply(e);
-            V value = valueMap.apply(e);
-            if (map.containsKey(key)) {
-                throw new RuntimeException("错误,ustream toMap时key不能重复");
-            } else {
-                map.put(key, value);
-            }
-        });
-        return map;
-    }
-
-    /**
-     * join
-     *
-     * @param charSequence
-     *
-     * @return
-     */
-    default String join(CharSequence charSequence) {
-        return join(charSequence, T::toString);
-    }
-
-    /**
-     * join
-     *
-     * @return
-     */
-    default String join() {
-        return join("", T::toString);
-    }
-
-    /**
-     * join
-     *
-     * @param charSequence
-     *
-     * @return
-     */
-    default String join(CharSequence charSequence, Function<T, String> function) {
-        StringJoiner joiner = new StringJoiner(charSequence);
-        consume(t -> joiner.add(function.apply(t)));
-        return joiner.toString();
-    }
 }

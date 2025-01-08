@@ -23,7 +23,6 @@ public class IdUtilTest {
     @Test
     public void newId() {
 
-        IdUtil idUtil = new IdUtil();
         int process = Runtime.getRuntime().availableProcessors();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(process, process * 2, 3000L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(100), new LogDealThreadFactory(), new CallerRunsPolicy());
         Set<Long> set = Collections.synchronizedSet(new HashSet<>());
@@ -31,7 +30,7 @@ public class IdUtilTest {
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < size; i++) {
             executor.execute(() -> {
-                long e = idUtil.newId();
+                long e = IdUtil.newId();
                 if (set.contains(e)) {
                     System.out.println("aaaaaaaaaaaaaaaaa");
                 }

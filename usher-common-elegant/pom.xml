@@ -26,7 +26,7 @@
     <dependencies>
         <dependency>
             <groupId>top.uhyils.usher</groupId>
-            <artifactId>usher-common-base</artifactId>
+            <artifactId>usher-common-base-spring</artifactId>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/top.uhyils.usher/usher-rpc-spring-start -->

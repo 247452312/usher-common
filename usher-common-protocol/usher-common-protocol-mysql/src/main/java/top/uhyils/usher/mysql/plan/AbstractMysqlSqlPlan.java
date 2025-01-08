@@ -60,7 +60,7 @@ public abstract class AbstractMysqlSqlPlan implements MysqlSqlPlan {
         this.sql = sql;
         this.params = params;
         this.headers = headers;
-        this.id = SpringUtil.getBean(IdUtil.class).newId();
+        this.id = IdUtil.newId();
         this.config = SpringUtil.getBean(MysqlPlanConfig.class);
     }
 

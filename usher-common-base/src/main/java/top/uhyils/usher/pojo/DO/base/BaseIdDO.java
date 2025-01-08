@@ -7,7 +7,6 @@ import top.uhyils.usher.context.LoginInfoHelper;
 import top.uhyils.usher.pojo.DTO.UserDTO;
 import top.uhyils.usher.pojo.cqe.DefaultCQE;
 import top.uhyils.usher.util.IdUtil;
-import top.uhyils.usher.util.SpringUtil;
 
 /**
  * 以id为主键的类都应该继承这个类
@@ -42,7 +41,7 @@ public abstract class BaseIdDO implements BaseDbSaveable {
 
     @Override
     public void preInsert(UserDTO userDO) {
-        IdUtil bean = SpringUtil.getBean(IdUtil.class);
+        IdUtil bean = IdUtil.getInstance();
         id = bean.newId();
     }
 

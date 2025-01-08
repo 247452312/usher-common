@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
-import org.springframework.cglib.beans.BeanCopier;
-import org.springframework.util.CollectionUtils;
+import net.sf.cglib.beans.BeanCopier;
 
 /**
  * @author uhyils <247452312@qq.com>
@@ -41,7 +40,7 @@ public final class BeanUtil {
     }
 
     public static <T> List<T> copyPropertiesOfList(@Nonnull List<?> sourceList, @Nonnull List<T> targetList, @Nonnull Class<T> targetType) {
-        if (CollectionUtils.isEmpty(sourceList)) {
+        if (CollectionUtil.isEmpty(sourceList)) {
             return Lists.newArrayList();
         } else {
             Iterator var3 = sourceList.iterator();
@@ -56,7 +55,7 @@ public final class BeanUtil {
     }
 
     public static <T> List<T> copyPropertiesOfList(@Nonnull List<?> sourceList, @Nonnull Class<T> targetType) {
-        if (CollectionUtils.isEmpty(sourceList)) {
+        if (CollectionUtil.isEmpty(sourceList)) {
             return Lists.newArrayList();
         } else {
             List<T> targetList = new ArrayList(sourceList.size());

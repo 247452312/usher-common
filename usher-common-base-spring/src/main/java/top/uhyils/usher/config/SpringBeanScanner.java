@@ -1,4 +1,4 @@
-package top.uhyils.usher.rpc.spring;
+package top.uhyils.usher.config;
 
 import java.lang.annotation.Annotation;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -12,7 +12,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2021年01月15日 14时53分
  */
-public class RpcSpringBeanScanner extends ClassPathBeanDefinitionScanner {
+public class SpringBeanScanner extends ClassPathBeanDefinitionScanner {
 
     /**
      * 要被扫描的注解
@@ -24,20 +24,18 @@ public class RpcSpringBeanScanner extends ClassPathBeanDefinitionScanner {
      */
     private Class<?> superInterface;
 
-    public RpcSpringBeanScanner(BeanDefinitionRegistry registry) {
+    public SpringBeanScanner(BeanDefinitionRegistry registry) {
         super(registry, false);
     }
 
     public void registerFilters() {
         boolean acceptAllInterfaces = Boolean.TRUE;
-
         if (this.annotationClass != null) {
             addIncludeFilter(new AnnotationTypeFilter(this.annotationClass));
             acceptAllInterfaces = Boolean.FALSE;
         }
         if (this.superInterface != null) {
             addIncludeFilter(new AssignableTypeFilter(this.superInterface) {
-
                 @Override
                 protected boolean matchClassName(String className) {
                     return Boolean.FALSE;

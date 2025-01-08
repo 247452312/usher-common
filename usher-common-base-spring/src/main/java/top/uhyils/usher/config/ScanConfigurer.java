@@ -1,4 +1,4 @@
-package top.uhyils.usher.rpc.spring;
+package top.uhyils.usher.config;
 
 import java.lang.annotation.Annotation;
 import org.springframework.beans.BeansException;
@@ -11,13 +11,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 
 /**
- * rpc注解扫描类,负责扫描某一个包中的指定注解 加入spring bean
- *
  * @author uhyils <247452312@qq.com>
- * @date 文件创建日期 2021年01月15日 15时39分
+ * @date 文件创建日期 2025年01月08日 08时54分
  */
-public class RpcConfigurer implements BeanDefinitionRegistryPostProcessor, ApplicationContextAware {
-
+public class ScanConfigurer implements BeanDefinitionRegistryPostProcessor, ApplicationContextAware {
     /**
      * 要扫描的类
      */
@@ -40,7 +37,7 @@ public class RpcConfigurer implements BeanDefinitionRegistryPostProcessor, Appli
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        RpcSpringBeanScanner scanner = new RpcSpringBeanScanner(registry);
+        SpringBeanScanner scanner = new SpringBeanScanner(registry);
         scanner.setAnnotationClass(this.annotationClass);
         scanner.setSuperInterface(this.superInterface);
         scanner.setResourceLoader(this.applicationContext);

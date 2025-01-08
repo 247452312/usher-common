@@ -3,7 +3,6 @@ package top.uhyils.usher.pojo.entity.type;
 import java.io.Serializable;
 import top.uhyils.usher.util.AESUtil;
 import top.uhyils.usher.util.Asserts;
-import top.uhyils.usher.util.SpringUtil;
 import top.uhyils.usher.util.StringUtil;
 
 /**
@@ -31,7 +30,7 @@ public class Password implements Serializable {
      * @return
      */
     public String encode() {
-        String encodeRules = SpringUtil.getProperty("token.encodeRules", "usher");
+        String encodeRules = System.getProperty("token.encodeRules", "usher");
         Asserts.assertTrue(StringUtil.isNotEmpty(encodeRules), "encodeRules没有配置");
         return AESUtil.AESEncode(encodeRules, mixedSalt(password));
     }
@@ -42,7 +41,7 @@ public class Password implements Serializable {
      * @return
      */
     public String decode() {
-        String encodeRules = SpringUtil.getProperty("token.encodeRules", "usher");
+        String encodeRules = System.getProperty("token.encodeRules", "usher");
         Asserts.assertTrue(StringUtil.isNotEmpty(encodeRules), "encodeRules没有配置");
         String decodePassword = AESUtil.AESDecode(encodeRules, password);
         return cleanSalt(decodePassword);
@@ -54,7 +53,7 @@ public class Password implements Serializable {
      * @return
      */
     private String mixedSalt(String password) {
-        String salt = SpringUtil.getProperty("token.salt", "usher");
+        String salt = System.getProperty("token.salt", "usher");
         return password + salt;
     }
 
@@ -64,7 +63,7 @@ public class Password implements Serializable {
      * @return
      */
     private String cleanSalt(String password) {
-        String salt = SpringUtil.getProperty("token.salt", "usher");
+        String salt = System.getProperty("token.salt", "usher");
         Asserts.assertTrue(StringUtil.isNotEmpty(salt));
         return password.substring(0, password.length() - salt.length());
     }

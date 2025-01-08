@@ -3,10 +3,13 @@ package top.uhyils.usher.ustream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +18,17 @@ import org.junit.jupiter.api.Test;
  * @date 文件创建日期 2024年11月26日 16时29分
  */
 class UStreamTest {
+
+
+    @Test
+    public void ofMap() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("k1", "v1");
+        map.put("k2", "v2");
+        UStream<Entry<String, String>> entryUStream = UStream.of(map);
+        assert entryUStream.count() == map.size();
+        assert "k1".equals(entryUStream.findFirst().get().getKey());
+    }
 
 
     @Test
@@ -187,7 +201,6 @@ class UStreamTest {
         assert Objects.equals(list.get(3), "4");
     }
 
-
     @Test
     void toMap1() {
         UStream<Integer> integerUStream = UStream.of(2, 2, 4, 3);
@@ -238,6 +251,27 @@ class UStreamTest {
         assert list1.size() == 2;
         assert list1.get(0) == 1;
         assert list1.get(1) == 2;
+    }
+
+    @Test
+    void takeWhile2() {
+        UStream<Integer> integerUStream = t -> {
+            int i1 = 1;
+            int i2 = 2;
+            while (true) {
+                t.accept(i1);
+                int i3 = i2;
+                i2 = i2 + i1;
+                i1 = i3;
+            }
+        };
+        List<Integer> list1 = integerUStream.takeWhile((index, value) -> index < 10).toList();
+        assert list1.size() == 10;
+        assert list1.get(0) == 1;
+        assert list1.get(1) == 2;
+        assert list1.get(2) == 3;
+        assert list1.get(3) == 5;
+        integerUStream.takeWhile((index, value) -> index < 10).forEach(System.out::println);
     }
 
     @Test
@@ -344,6 +378,47 @@ class UStreamTest {
         assert list1.get(2) == 4;
         assert list1.get(3) == 3;
 
+    }
+
+    @Test
+    void of1() {
+        Node node7 = new Node(7);
+        Node node6 = new Node(6);
+        Node node5 = new Node(5);
+        Node node4 = new Node(4);
+        Node node3 = new Node(3, node6, node7);
+        Node node2 = new Node(2, node4, node5);
+        Node node1 = new Node(1, node2, node3);
+        UStream<Node> nodeUStream = t -> valueFirst(t, node1);
+        nodeUStream.forEach(t -> System.out.println(t.value));
+    }
+
+    private void valueFirst(Consumer<Node> t, Node node1) {
+        if (node1 == null) {
+            return;
+        }
+        t.accept(node1);
+        valueFirst(t, node1.left);
+        valueFirst(t, node1.right);
+    }
+
+    private static class Node {
+
+        private int value;
+
+        private Node left;
+
+        private Node right;
+
+        public Node(int value) {
+            this.value = value;
+        }
+
+        public Node(int value, Node left, Node right) {
+            this.value = value;
+            this.left = left;
+            this.right = right;
+        }
     }
 
 }

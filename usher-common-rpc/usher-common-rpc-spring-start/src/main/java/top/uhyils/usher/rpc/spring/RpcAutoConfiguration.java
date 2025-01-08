@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.util.StringUtils;
+import top.uhyils.usher.config.ScanConfigurer;
 import top.uhyils.usher.rpc.annotation.RpcService;
 import top.uhyils.usher.rpc.cluster.Cluster;
 import top.uhyils.usher.rpc.cluster.ClusterFactory;
@@ -53,10 +54,10 @@ public class RpcAutoConfiguration implements BeanFactoryAware, ApplicationContex
      * @return
      */
     @Bean(RPC_CONFIGURER)
-    public static RpcConfigurer createRpcConfigurer(BeanFactory beanFactory) {
+    public static ScanConfigurer createRpcConfigurer(BeanFactory beanFactory) {
         // 获取所有的扫描包(spring自带)
         List<String> packages = AutoConfigurationPackages.get(beanFactory);
-        RpcConfigurer rpcConfigurer = new RpcConfigurer();
+        ScanConfigurer rpcConfigurer = new ScanConfigurer();
         rpcConfigurer.setBasePackage(StringUtils.collectionToCommaDelimitedString(packages));
         rpcConfigurer.setAnnotationClass(RpcService.class);
         return rpcConfigurer;

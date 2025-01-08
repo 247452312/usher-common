@@ -61,10 +61,6 @@ public class RpcProxyDefaultHandler implements RpcProxyHandlerInterface {
      */
     private List<ConsumerResponseObjectExtension> consumerResponseObjectExtensions;
 
-    /**
-     * 唯一id生成器(雪花)
-     */
-    private IdUtil idUtil;
 
     /**
      * 创建时初始化
@@ -88,7 +84,6 @@ public class RpcProxyDefaultHandler implements RpcProxyHandlerInterface {
         }
         Class<?> clazz = (Class<?>) params[0];
         this.type = clazz;
-        this.idUtil = new IdUtil();
         // 如果懒加载,那么就不加载
         if (isCheck()) {
             try {
@@ -115,7 +110,7 @@ public class RpcProxyDefaultHandler implements RpcProxyHandlerInterface {
         // 验证method和arg是否正确
         validateArgsWithMethodParams(args, method);
         // 初始化RPCData
-        RpcData rpcData = initRpcData(idUtil.newId(), method.getName(), Arrays.stream(args).map(Object::getClass).toArray(Class[]::new), args);
+        RpcData rpcData = initRpcData(IdUtil.newId(), method.getName(), Arrays.stream(args).map(Object::getClass).toArray(Class[]::new), args);
         // registry执行方法
         RpcData invoke = registry.invoke(rpcData);
         // 解析结果 - 正常返回或者报错

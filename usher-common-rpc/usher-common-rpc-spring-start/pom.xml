@@ -38,6 +38,10 @@
         </dependency>
         <dependency>
             <groupId>top.uhyils.usher</groupId>
+            <artifactId>usher-common-base-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>top.uhyils.usher</groupId>
             <artifactId>usher-common-rpc-proxy</artifactId>
         </dependency>
         <dependency>
