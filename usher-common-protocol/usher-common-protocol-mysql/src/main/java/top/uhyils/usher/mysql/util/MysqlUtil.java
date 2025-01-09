@@ -4,6 +4,8 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNumericLiteralExpr;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.ByteBuf;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,8 +19,8 @@ import org.apache.commons.io.HexDump;
 import top.uhyils.usher.annotation.NotNull;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.pojo.DTO.ExprParseResultInfo;
-import top.uhyils.usher.mysql.pojo.DTO.FieldInfo;
-import top.uhyils.usher.mysql.pojo.DTO.NodeInvokeResult;
+import top.uhyils.usher.pojo.FieldInfo;
+import top.uhyils.usher.pojo.NodeInvokeResult;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.LogUtil;
 
@@ -484,8 +486,8 @@ public final class MysqlUtil {
             Asserts.assertTrue(nodeInvokeResult != null, "未找到临时变量对应的执行计划");
             Asserts.assertTrue(nodeInvokeResult.getFieldInfos().size() == 1, "方法入参不能是多列");
             FieldInfo fieldInfo = nodeInvokeResult.getFieldInfos().get(0);
-            List<Map<String, Object>> result = nodeInvokeResult.getResult();
-            List<T> collect = result.stream().map(t -> (T) t.get(fieldInfo.getFieldName())).collect(Collectors.toList());
+            JSONArray result = nodeInvokeResult.getResult();
+            List<T> collect = result.stream().map(t -> (T) ((JSONObject) t).get(fieldInfo.getFieldName())).collect(Collectors.toList());
             return ExprParseResultInfo.buildListConstant(collect);
         } else if (arg instanceof SQLCharExpr) {
             String text = ((SQLCharExpr) arg).getText();
@@ -495,7 +497,7 @@ public final class MysqlUtil {
             return ExprParseResultInfo.buildConstant((T) value);
         } else if (arg instanceof SQLIdentifierExpr) {
             String name = ((SQLIdentifierExpr) arg).getName();
-            List<T> collect = parentInvokeResult.getResult().stream().map(t -> (T) t.get(name)).collect(Collectors.toList());
+            List<T> collect = parentInvokeResult.getResult().stream().map(t -> (T) ((JSONObject) t).get(name)).collect(Collectors.toList());
             return ExprParseResultInfo.buildListConstant(collect);
         }
         Asserts.throwException("未找到解析方法入参的类型");

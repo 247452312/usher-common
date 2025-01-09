@@ -1,7 +1,7 @@
 package top.uhyils.usher.mysql.pojo.plan;
 
 import java.util.Map;
-import top.uhyils.usher.mysql.plan.AbstractMysqlSqlPlan;
+import top.uhyils.usher.plan.AbstractMysqlSqlPlan;
 
 /**
  * use命令

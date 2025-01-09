@@ -1,0 +1,115 @@
+package top.uhyils.usher.plan.query.impl;
+
+import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
+import com.alibaba.fastjson.JSONArray;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import top.uhyils.usher.content.CallNodeContent;
+import top.uhyils.usher.enums.QuerySqlTypeEnum;
+import top.uhyils.usher.plan.query.BlockQuerySelectSqlPlan;
+import top.uhyils.usher.pojo.InvokeCommandBuilder;
+import top.uhyils.usher.pojo.MysqlInvokeCommand;
+import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.SqlTableSourceBinaryTreeInfo;
+import top.uhyils.usher.sql.ExprParseResultInfo;
+import top.uhyils.usher.util.Asserts;
+import top.uhyils.usher.util.MysqlUtil;
+import top.uhyils.usher.util.StringUtil;
+
+/**
+ * 简单sql执行计划
+ *
+ * @author uhyils <247452312@qq.com>
+ * @date 文件创建日期 2022年08月26日 16时31分
+ */
+public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
+
+
+    public BlockQuerySelectSqlPlanImpl(SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers, Map<String, Object> params) {
+        super(froms, headers, params);
+    }
+
+
+    @Override
+    public NodeInvokeResult invoke(Map<String, String> headers) {
+        InvokeCommandBuilder invokeCommandBuilder = new InvokeCommandBuilder();
+        invokeCommandBuilder.type(QuerySqlTypeEnum.QUERY);
+        invokeCommandBuilder.addArgs(params);
+        invokeCommandBuilder.addHeader(headers);
+        SQLExprTableSource tableSource = froms.getTableSource();
+        invokeCommandBuilder.addAlias(tableSource.getAlias());
+        SQLPropertyExpr expr = (SQLPropertyExpr) tableSource.getExpr();
+        String owner = expr.getOwnernName();
+        String tableName = expr.getName();
+        if (tableName.startsWith("&")) {
+            Long resultIndex = Long.parseLong(tableName.substring(1));
+            return lastAllPlanResult.get(resultIndex);
+        }
+        List<SQLBinaryOpExpr> where = froms.getWhere();
+        Map<String, Object> whereParams = new HashMap<>();
+        boolean haveResult = true;
+        if (where != null) {
+            for (SQLBinaryOpExpr sqlBinaryOpExpr : where) {
+                SQLExpr left = sqlBinaryOpExpr.getLeft();
+                SQLExpr right = sqlBinaryOpExpr.getRight();
+
+                // where两边都不是属性的时候直接忽略
+                if (!(left instanceof SQLIdentifierExpr) && !(right instanceof SQLIdentifierExpr)) {
+                    // 如果两边不一致,则无结果
+                    if (!Objects.equals(left.toString(), right.toString())) {
+                        haveResult = false;
+                    }
+                    continue;
+                }
+                String leftStr = null;
+                // 这里解析符号左边的参数
+                if (left.toString().startsWith("&")) {
+                    ExprParseResultInfo<Object> leftResponseInfo = MysqlUtil.parse(left, lastAllPlanResult, lastNodeInvokeResult);
+                    leftStr = leftResponseInfo.get().toString();
+                } else {
+                    leftStr = left.toString();
+                }
+                List<Object> rightObjs = new ArrayList<>();
+                // 这里解析符号右边的参数
+                if (right instanceof MySqlCharExpr && ((MySqlCharExpr) right).getText().startsWith("&")) {
+                    ExprParseResultInfo<Object> rightResponseInfo = MysqlUtil.parse(right, lastAllPlanResult, lastNodeInvokeResult);
+                    rightObjs.addAll(rightResponseInfo.getListResult());
+                } else {
+                    rightObjs.add(right.toString());
+                }
+                whereParams.put(leftStr, rightObjs);
+            }
+        }
+        invokeCommandBuilder.addArgs(whereParams);
+        String database = CallNodeContent.CALLER_INFO.get().getDatabaseName();
+        if (owner != null) {
+            invokeCommandBuilder.fillDatabase(owner);
+        } else if (StringUtil.isNotEmpty(database)) {
+            invokeCommandBuilder.fillDatabase(database);
+        } else {
+            Asserts.throwException("No database selected");
+        }
+        invokeCommandBuilder.fillTable(tableName);
+        MysqlInvokeCommand build = invokeCommandBuilder.build();
+        NodeInvokeResult nodeInvokeResult = handler.apply(build);
+        nodeInvokeResult.setSourcePlan(this);
+        if (!haveResult) {
+            nodeInvokeResult.setResult(new JSONArray());
+        }
+
+        // 平铺/展开结果中的json
+        nodeInvokeResult = tileResultJson(nodeInvokeResult);
+        return nodeInvokeResult;
+    }
+
+
+
+}

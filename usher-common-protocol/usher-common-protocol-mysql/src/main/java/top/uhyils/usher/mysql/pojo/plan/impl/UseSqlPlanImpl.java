@@ -2,9 +2,9 @@ package top.uhyils.usher.mysql.pojo.plan.impl;
 
 import java.util.Map;
 import top.uhyils.usher.mysql.content.MysqlContent;
-import top.uhyils.usher.mysql.pojo.DTO.NodeInvokeResult;
 import top.uhyils.usher.mysql.pojo.entity.MysqlTcpLink;
 import top.uhyils.usher.mysql.pojo.plan.UsePlan;
+import top.uhyils.usher.pojo.NodeInvokeResult;
 
 /**
  * @author uhyils <247452312@qq.com>
@@ -16,8 +16,9 @@ public class UseSqlPlanImpl extends UsePlan {
         super(database, headers, params);
     }
 
+
     @Override
-    public NodeInvokeResult invoke() {
+    public NodeInvokeResult invoke(Map<String, String> headers) {
         MysqlTcpLink mysqlTcpLink = MysqlContent.MYSQL_TCP_INFO.get();
         mysqlTcpLink.setDatabase(database);
         return new NodeInvokeResult(this);

@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>top.uhyils.usher</groupId>
-            <artifactId>usher-common-util-obj-pool</artifactId>
+            <artifactId>usher-common-util-sql-parse</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -2,9 +2,9 @@ package top.uhyils.usher.node.call;
 
 import com.alibaba.fastjson.JSONObject;
 import java.util.Map;
-import top.uhyils.usher.node.NodeInvokeResult;
 import top.uhyils.usher.node.handler.MysqlServiceHandler;
-import top.uhyils.usher.node.plan.PlanInvoker;
+import top.uhyils.usher.plan.PlanInvoker;
+import top.uhyils.usher.pojo.NodeInvokeResult;
 
 /**
  * 执行中间节点, 在宏观上是一个图,每个节点中都保存着一条sql语句用来递归执行后面的节点 具体哪个节点是根据解析的执行计划来确定
@@ -29,7 +29,10 @@ public class SqlCallNode implements CallNode {
 
     @Override
     public NodeInvokeResult call(Map<String, String> header, JSONObject params) {
-        return PlanInvoker.execute(sql, header, params, handler);
+        return PlanInvoker.execute(sql, header, params, mysqlInvokeCommand -> {
+            CallNode callNode = handler.makeNode(mysqlInvokeCommand);
+            return callNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
     }
 
     /**

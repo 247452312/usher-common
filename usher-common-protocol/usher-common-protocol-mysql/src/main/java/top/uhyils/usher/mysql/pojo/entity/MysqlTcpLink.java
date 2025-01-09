@@ -59,11 +59,6 @@ public class MysqlTcpLink extends AbstractEntity<ChannelId> {
      */
     private Map<Long, PrepareInfo> prepareSqlMap = new ConcurrentHashMap<>();
 
-    /**
-     * 当前所在数据库
-     */
-    private String database = "MY_DEFAULT_DB";
-
     public MysqlTcpLink(ChannelId channelId, InetSocketAddress inetSocketAddress) {
         super(channelId);
         this.localAddress = inetSocketAddress;
@@ -87,13 +82,6 @@ public class MysqlTcpLink extends AbstractEntity<ChannelId> {
         return MysqlContent.MYSQL_TCP_INFO.get();
     }
 
-    public String getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(String database) {
-        this.database = database;
-    }
 
 
     public InetSocketAddress findLocalAddress() {

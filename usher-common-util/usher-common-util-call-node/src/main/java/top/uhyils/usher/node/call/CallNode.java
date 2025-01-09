@@ -3,7 +3,7 @@ package top.uhyils.usher.node.call;
 import com.alibaba.fastjson.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
-import top.uhyils.usher.node.NodeInvokeResult;
+import top.uhyils.usher.pojo.NodeInvokeResult;
 
 /**
  * 执行节点
