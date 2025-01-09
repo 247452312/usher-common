@@ -21,6 +21,7 @@
         <module>usher-common-util-scenario</module>
         <module>usher-common-util-ustream</module>
         <module>usher-common-util-thread-sync</module>
+        <module>usher-common-util-call-node</module>
     </modules>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

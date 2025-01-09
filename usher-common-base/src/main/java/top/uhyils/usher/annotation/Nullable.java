@@ -15,4 +15,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Nullable {
 
+    /**
+     * 说明, 可以理解为备注
+     *
+     * @return
+     */
+    String value() default "";
 }

@@ -143,6 +143,11 @@
             </dependency>
             <dependency>
                 <groupId>top.uhyils.usher</groupId>
+                <artifactId>usher-common-util-call-node</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>top.uhyils.usher</groupId>
                 <artifactId>usher-common-util-thread-sync</artifactId>
                 <version>${project.version}</version>
             </dependency>
