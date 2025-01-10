@@ -23,18 +23,23 @@ public class TableDTO implements Serializable {
      */
     private Long nodeId;
 
+    /**
+     * 数据库名称
+     */
+    private String database;
 
     /**
-     * 对应唯一标识(url形式),如果是mysql调用,则使用全称拼写,例如库名/表名
+     * 表
      */
-    private String url;
+    private String table;
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
             .append("companyId", getCompanyId())
             .append("nodeId", getNodeId())
-            .append("url", getUrl())
+            .append("database", getDatabase())
+            .append("table", getTable())
             .toString();
     }
 
@@ -54,11 +59,19 @@ public class TableDTO implements Serializable {
         this.nodeId = nodeId;
     }
 
-    public String getUrl() {
-        return url;
+    public String getDatabase() {
+        return database;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setDatabase(String database) {
+        this.database = database;
+    }
+
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
     }
 }

@@ -14,10 +14,12 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 import top.uhyils.usher.context.LoginInfoHelper;
 import top.uhyils.usher.exception.AssertException;
+import top.uhyils.usher.handler.NodeHandler;
 import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.decode.MysqlDecoder;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.enums.MysqlHandlerStatusEnum;
+import top.uhyils.usher.mysql.handler.MysqlServiceHandler;
 import top.uhyils.usher.mysql.pojo.cqe.MysqlCommand;
 import top.uhyils.usher.mysql.pojo.cqe.impl.ComBinlogDumpCommand;
 import top.uhyils.usher.mysql.pojo.cqe.impl.ComChangeUserCommand;
@@ -69,9 +71,25 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
 
 
     /**
+     * 单纯sql 服务处理器
+     */
+    private final NodeHandler handler;
+
+    /**
+     * mysql协议相关服务处理器
+     */
+    private final MysqlServiceHandler mysqlServiceHandler;
+
+
+    /**
      * 连接
      */
     private Channel mysqlChannel;
+
+    public MysqlInfoHandler(NodeHandler handler, MysqlServiceHandler mysqlServiceHandler) {
+        this.handler = handler;
+        this.mysqlServiceHandler = mysqlServiceHandler;
+    }
 
 
     @Override
@@ -180,7 +198,7 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
         switch (status) {
             case FIRST_SIGHT:
                 // 第一次见,默认为登录请求
-                mysqlCommand = new MysqlAuthCommand(mysqlBytes);
+                mysqlCommand = new MysqlAuthCommand(mysqlBytes, mysqlServiceHandler);
                 break;
             case PASSED:
                 // 其他状态,正确接收请求
@@ -260,7 +278,7 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
             /*这里是需要发送往后台进行处理的请求类型*/
             case COM_QUERY:
                 // sql查询请求
-                return new ComQueryCommand(mysqlBytes);
+                return new ComQueryCommand(mysqlBytes, handler);
             case COM_FIELD_LIST:
                 // 字段获取请求
                 return new ComFieldListCommand(mysqlBytes);
@@ -271,7 +289,7 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
 
             case COM_STMT_EXECUTE:
                 // 执行预处理语句
-                return new ComStmtExecuteCommand(mysqlBytes);
+                return new ComStmtExecuteCommand(mysqlBytes, handler);
 
 
             /*以下是不需要发送往服务器进行处理的请求类型*/
@@ -315,7 +333,7 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
                 return new ComDropDbCommand(mysqlBytes);
 
             case COM_INIT_DB:
-                return new ComInitDbCommand(mysqlBytes);
+                return new ComInitDbCommand(mysqlBytes, mysqlServiceHandler);
 
             case COM_REFRESH:
                 return new ComRefreshCommand(mysqlBytes);

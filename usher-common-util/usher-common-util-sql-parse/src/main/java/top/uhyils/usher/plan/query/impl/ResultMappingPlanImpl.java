@@ -16,23 +16,23 @@ import java.util.stream.Collectors;
 import top.uhyils.usher.annotation.NotNull;
 import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.enums.FieldTypeEnum;
-import top.uhyils.usher.enums.MysqlMethodEnum;
-import top.uhyils.usher.plan.MysqlPlan;
+import top.uhyils.usher.enums.SqlMethodEnum;
+import top.uhyils.usher.plan.SqlPlan;
 import top.uhyils.usher.plan.query.AbstractResultMappingPlan;
 import top.uhyils.usher.plan.query.BlockQuerySelectSqlPlan;
 import top.uhyils.usher.plan.query.JoinSqlPlan;
 import top.uhyils.usher.pojo.FieldInfo;
-import top.uhyils.usher.pojo.MysqlGlobalVariables;
-import top.uhyils.usher.pojo.MysqlInvokeCommand;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.SqlGlobalVariables;
+import top.uhyils.usher.pojo.SqlInvokeCommand;
 import top.uhyils.usher.sql.ExprParseResultInfo;
-import top.uhyils.usher.sql.MySQLSelectItem;
+import top.uhyils.usher.sql.UsherSQLSelectItem;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.CollectionUtil;
 import top.uhyils.usher.util.JSONUtil;
-import top.uhyils.usher.util.MysqlStringUtil;
-import top.uhyils.usher.util.MysqlUtil;
+import top.uhyils.usher.util.SqlStringUtil;
 import top.uhyils.usher.util.StringUtil;
+import top.uhyils.usher.util.UsherSqlUtil;
 
 /**
  * @author uhyils <247452312@qq.com>
@@ -47,31 +47,31 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
     private final Boolean mergeable;
 
     /**
-     * mysql系统变量
+     * sql系统变量
      */
-    private final JSONObject mysqlSystemVariables;
+    private final JSONObject sqlSystemVariables;
 
     /**
      * 当前映射之前最后一个查询执行计划的结果
      */
     private NodeInvokeResult lastQueryPlanResult;
 
-    public ResultMappingPlanImpl(Map<String, String> headers, MysqlPlan lastMainPlan, List<MySQLSelectItem> selectList) {
+    public ResultMappingPlanImpl(Map<String, String> headers, SqlPlan lastMainPlan, List<UsherSQLSelectItem> selectList) {
         super(headers, lastMainPlan, selectList);
-        this.mysqlSystemVariables = JSONObject.parseObject(JSON.toJSONString(new MysqlGlobalVariables()));
+        this.sqlSystemVariables = JSONObject.parseObject(JSON.toJSONString(new SqlGlobalVariables()));
         // 是否是每行一个结果
-        List<MysqlMethodEnum> allMethod = selectList.stream().filter(MySQLSelectItem::isMethodItem).map(MySQLSelectItem::method).collect(Collectors.toList());
+        List<SqlMethodEnum> allMethod = selectList.stream().filter(UsherSQLSelectItem::isMethodItem).map(UsherSQLSelectItem::method).collect(Collectors.toList());
         // 如果没有method 理论上不需要合并多行数据
         if (CollectionUtil.isEmpty(allMethod)) {
             this.mergeable = false;
         } else {
             // 只要有一个方法需要合并,则需要合并
-            this.mergeable = allMethod.stream().anyMatch(MysqlMethodEnum::getMergeable);
+            this.mergeable = allMethod.stream().anyMatch(SqlMethodEnum::getMergeable);
         }
     }
 
     @Override
-    public void complete(Map<Long, NodeInvokeResult> planArgs, Function<MysqlInvokeCommand, NodeInvokeResult> handler) {
+    public void complete(Map<Long, NodeInvokeResult> planArgs, Function<SqlInvokeCommand, NodeInvokeResult> handler) {
         // 填充占位符
         completePlaceholder(planArgs);
         this.lastAllPlanResult = planArgs;
@@ -80,7 +80,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
         for (int i = planIds.size() - 1; i >= 0; i--) {
             Long key = planIds.get(i);
             NodeInvokeResult nodeInvokeResult = planArgs.get(key);
-            MysqlPlan sourcePlan = nodeInvokeResult.getSourcePlan();
+            SqlPlan sourcePlan = nodeInvokeResult.getSourcePlan();
             if (sourcePlan instanceof BlockQuerySelectSqlPlan || sourcePlan instanceof JoinSqlPlan) {
                 this.lastQueryPlanResult = nodeInvokeResult;
                 break;
@@ -138,7 +138,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
         List<FieldInfo> newFieldInfo = new ArrayList<>();
         JSONArray newResultList = new JSONArray();
 
-        for (MySQLSelectItem needField : selectList) {
+        for (UsherSQLSelectItem needField : selectList) {
             String needFieldStr = needField.getExpr().toString();
 
             String finalName = needField.getAlias();
@@ -193,7 +193,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 }
 
                 /*4.如果列是查询系统配置的,则返回*/
-                newFieldInfo.add(new FieldInfo(CallNodeContent.DUAL_DATABASES, "dual", "dual", finalName, needFieldStr, 0, 0, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
+                newFieldInfo.add(new FieldInfo(CallNodeContent.DUAL_DATABASES, "dual", "dual", finalName, needFieldStr, 0, 0, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                 String variableName = needFieldStr;
                 if (needFieldStr.startsWith("@@")) {
                     variableName = variableName.substring(2);
@@ -202,21 +202,21 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 if (needField.isGlobal()) {
                     variableName = "global." + variableName;
                 }
-                Object o = JSONUtil.recursiveMatch(mysqlSystemVariables, variableName);
+                Object o = JSONUtil.recursiveMatch(sqlSystemVariables, variableName);
 
                 for (Object stringObjectMap : newResultList) {
                     JSONObject jsonObjectMap = (JSONObject) stringObjectMap;
                     jsonObjectMap.put(finalName, o);
                 }
             } else if (needFieldStr.startsWith("'") && needFieldStr.endsWith("'")) {
-                newFieldInfo.add(new FieldInfo(CallNodeContent.DUAL_DATABASES, "dual", "dual", finalName, needFieldStr, 0, 0, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
+                newFieldInfo.add(new FieldInfo(CallNodeContent.DUAL_DATABASES, "dual", "dual", finalName, needFieldStr, 0, 0, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                 for (Object stringObjectMap : newResultList) {
                     JSONObject jsonObjectMap = (JSONObject) stringObjectMap;
-                    jsonObjectMap.put(finalName, MysqlStringUtil.cleanSingleQuotationMark(needFieldStr));
+                    jsonObjectMap.put(finalName, SqlStringUtil.cleanSingleQuotationMark(needFieldStr));
                 }
             } else {
                 /*4.如果结果列为 A.name A.`name` `A`.`name` 则通过tableName回溯寻找表来源,拼装*/
-                needFieldStr = MysqlStringUtil.cleanQuotation(needFieldStr);
+                needFieldStr = SqlStringUtil.cleanQuotation(needFieldStr);
                 FieldInfo lastFieldInfo = queryFieldByKey(needFieldStr, lastFieldInfos);
                 if (lastFieldInfo == null) {
                     Asserts.throwException("未找到字段:" + needFieldStr);
@@ -254,11 +254,11 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
     private NodeInvokeResult makeMethodNoSingleLine() {
         Map<String, Object> resultItem = new HashMap<>();
         List<FieldInfo> fieldInfos = new ArrayList<>();
-        Map<String, FieldInfo> fieldInfoMap = this.lastQueryPlanResult.getFieldInfos().stream().collect(Collectors.toMap(t -> MysqlStringUtil.cleanQuotation(t.getFieldName()), t -> t));
+        Map<String, FieldInfo> fieldInfoMap = this.lastQueryPlanResult.getFieldInfos().stream().collect(Collectors.toMap(t -> SqlStringUtil.cleanQuotation(t.getFieldName()), t -> t));
 
 
         /*每一个field都需要寻找是否是方法执行, 如果是正常的数据行,则需要判断容错查询参数是否开启*/
-        for (MySQLSelectItem needField : selectList) {
+        for (UsherSQLSelectItem needField : selectList) {
             String needFieldStr = needField.getExpr().toString();
 
             String finalName = needField.getAlias();
@@ -269,7 +269,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
 
             if (needFieldStr.startsWith("&")) {
                 /*从之前的执行计划结果中获取实际结果,此时实际结果只能有一列一行, 名称从field的原始列信息中获取*/
-                ExprParseResultInfo<Object> parse = MysqlUtil.parse(needField.getExpr(), lastAllPlanResult, lastQueryPlanResult);
+                ExprParseResultInfo<Object> parse = UsherSqlUtil.parse(needField.getExpr(), lastAllPlanResult, lastQueryPlanResult);
 
                 if (parse.count() == 1) {
                     resultItem.put(finalName, parse.get());
@@ -278,7 +278,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 }
 
             } else if (needFieldStr.startsWith("@@") || needField.isGlobal()) {
-                fieldInfos.add(new FieldInfo(CallNodeContent.DUAL_DATABASES, "dual", "dual", finalName, finalName, 0, 0, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
+                fieldInfos.add(new FieldInfo(CallNodeContent.DUAL_DATABASES, "dual", "dual", finalName, finalName, 0, 0, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                 String variableName = needFieldStr;
                 if (needFieldStr.startsWith("@@")) {
                     variableName = variableName.substring(2);
@@ -287,7 +287,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 if (needField.isGlobal()) {
                     variableName = "global." + variableName;
                 }
-                Object o = JSONUtil.recursiveMatch(mysqlSystemVariables, variableName);
+                Object o = JSONUtil.recursiveMatch(sqlSystemVariables, variableName);
                 resultItem.put(finalName, o);
             } else {
                 //                Boolean allowFault = config.getAllowFault();
@@ -299,14 +299,14 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 if (CollectionUtil.isNotEmpty(lastResult)) {
                     JSONObject first = (JSONObject) lastResult.get(0);
                     for (Entry<String, Object> entry : first.entrySet()) {
-                        if (Objects.equal(MysqlStringUtil.cleanQuotation(needFieldStr), MysqlStringUtil.cleanQuotation(entry.getKey())) || Objects.equal(needFieldStr, "*")) {
+                        if (Objects.equal(SqlStringUtil.cleanQuotation(needFieldStr), SqlStringUtil.cleanQuotation(entry.getKey())) || Objects.equal(needFieldStr, "*")) {
                             newResult = entry.getValue();
                         }
                     }
                 }
                 resultItem.put(finalName, newResult);
                 /*获取对应的字段信息*/
-                fieldInfos.add(fieldInfoMap.get(MysqlStringUtil.cleanQuotation(needFieldStr)));
+                fieldInfos.add(fieldInfoMap.get(SqlStringUtil.cleanQuotation(needFieldStr)));
             }
         }
         JSONArray result = new JSONArray();
@@ -346,7 +346,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
         if (CollectionUtil.isEmpty(collect)) {
             return lastFieldInfo.copyWithNewFieldName(finalName);
         }
-        Integer fieldIndex = MysqlStringUtil.subFieldIndex(lastFieldInfo.getFieldName());
+        Integer fieldIndex = SqlStringUtil.subFieldIndex(lastFieldInfo.getFieldName());
         int index;
         if (fieldIndex == null) {
             index = 1;

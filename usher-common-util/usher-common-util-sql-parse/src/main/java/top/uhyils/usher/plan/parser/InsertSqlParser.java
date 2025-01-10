@@ -5,7 +5,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import top.uhyils.usher.plan.MysqlPlan;
+import top.uhyils.usher.plan.SqlPlan;
 
 /**
  * 常规insert语句解析类
@@ -27,7 +27,7 @@ public class InsertSqlParser extends AbstractSqlParser {
     }
 
     @Override
-    public List<MysqlPlan> parse(SQLStatement sql, Map<String, String> headers) {
+    public List<SqlPlan> parse(SQLStatement sql, Map<String, String> headers) {
         return new ArrayList<>();
     }
 }

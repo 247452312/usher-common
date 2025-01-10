@@ -10,7 +10,7 @@ import top.uhyils.usher.pojo.FieldInfo;
 import top.uhyils.usher.util.Asserts;
 
 /**
- * mysql列类型
+ * sql列类型
  *
  * @author uhyils <247452312@qq.com>
  * @version 1.0
@@ -18,7 +18,7 @@ import top.uhyils.usher.util.Asserts;
  */
 public enum FieldTypeEnum {
     /**
-     * mysql列类型
+     * sql列类型
      */
     FIELD_TYPE_DECIMAL((byte) 0x00, BigDecimal.class),
     FIELD_TYPE_TINY((byte) 0x01, Integer.class),
@@ -84,9 +84,9 @@ public enum FieldTypeEnum {
     @NotNull
     public static FieldInfo makeFieldInfo(String dbName, String tableName, String tableRealName, Class<?> clazz, int index, String fieldName) {
         if (Number.class.isAssignableFrom(clazz)) {
-            return new FieldInfo(dbName, tableName, tableRealName, fieldName, fieldName, 0, index, FIELD_TYPE_FLOAT.clazz, (short) 0, (byte) 0);
+            return new FieldInfo(dbName, tableName, tableRealName, fieldName, fieldName, 0, index, FIELD_TYPE_FLOAT, (short) 0, (byte) 0);
         } else if (String.class.isAssignableFrom(clazz)) {
-            return new FieldInfo(dbName, tableName, tableRealName, fieldName, fieldName, 0, index, FIELD_TYPE_VARCHAR.clazz, (short) 0, (byte) 0);
+            return new FieldInfo(dbName, tableName, tableRealName, fieldName, fieldName, 0, index, FIELD_TYPE_VARCHAR, (short) 0, (byte) 0);
         } else {
             throw Asserts.makeException("未知的字段类型:{}", clazz.getName());
         }

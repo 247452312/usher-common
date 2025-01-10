@@ -14,8 +14,8 @@ import top.uhyils.usher.pojo.NodeInvokeResult;
 import top.uhyils.usher.sql.ExprParseResultInfo;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.MapUtil;
-import top.uhyils.usher.util.MysqlUtil;
 import top.uhyils.usher.util.StringUtil;
+import top.uhyils.usher.util.UsherSqlUtil;
 
 /**
  * 表达式执行计划
@@ -34,13 +34,13 @@ public class BinarySqlPlanImpl extends BinarySqlPlan {
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(this);
         List<FieldInfo> fieldInfos = new ArrayList<>();
         /*left Expr 或者 right Expr 是多行的话,结果就是多行, 如果均不是指针,则指定结果*/
-        fieldInfos.add(new FieldInfo("information_schema", "tables", "tables", CallNodeContent.DEFAULT_RESULT_NAME, CallNodeContent.DEFAULT_RESULT_NAME, 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
+        fieldInfos.add(new FieldInfo("information_schema", "tables", "tables", CallNodeContent.DEFAULT_RESULT_NAME, CallNodeContent.DEFAULT_RESULT_NAME, 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
         nodeInvokeResult.setFieldInfos(fieldInfos);
 
         /*判断结果是什么*/
         JSONArray result = new JSONArray();
-        ExprParseResultInfo<Object> left = MysqlUtil.parse(leftExpr, lastAllPlanResult, lastNodeInvokeResult);
-        ExprParseResultInfo<Object> right = MysqlUtil.parse(rightExpr, lastAllPlanResult, lastNodeInvokeResult);
+        ExprParseResultInfo<Object> left = UsherSqlUtil.parse(leftExpr, lastAllPlanResult, lastNodeInvokeResult);
+        ExprParseResultInfo<Object> right = UsherSqlUtil.parse(rightExpr, lastAllPlanResult, lastNodeInvokeResult);
 
         // 如果两边都是常量,size为1 否则 哪边是列表size是哪边 如果两边都是,则使用左边字符串为准
         long size = !left.isConstant() ? left.getListResult().size() : (!right.isConstant() ? right.getListResult().size() : 1);

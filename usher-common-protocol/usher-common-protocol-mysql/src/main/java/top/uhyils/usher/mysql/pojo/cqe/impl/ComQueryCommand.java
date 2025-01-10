@@ -1,23 +1,26 @@
 package top.uhyils.usher.mysql.pojo.cqe.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import top.uhyils.usher.exception.AssertException;
+import top.uhyils.usher.handler.NodeHandler;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.enums.SqlTypeEnum;
-import top.uhyils.usher.mysql.plan.MysqlPlan;
-import top.uhyils.usher.mysql.plan.PlanInvoker;
-import top.uhyils.usher.mysql.pojo.DTO.NodeInvokeResult;
 import top.uhyils.usher.mysql.pojo.response.MysqlResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.ErrResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.OkResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.ResultSetResponse;
-import top.uhyils.usher.mysql.util.PlanUtil;
 import top.uhyils.usher.mysql.util.Proto;
+import top.uhyils.usher.node.call.CallNode;
+import top.uhyils.usher.plan.PlanInvoker;
+import top.uhyils.usher.plan.SqlPlan;
+import top.uhyils.usher.pojo.NodeInvokeResult;
 import top.uhyils.usher.util.CollectionUtil;
 import top.uhyils.usher.util.LogUtil;
+import top.uhyils.usher.util.PlanUtil;
 import top.uhyils.usher.util.StringUtil;
 
 
@@ -28,15 +31,18 @@ import top.uhyils.usher.util.StringUtil;
  */
 public class ComQueryCommand extends MysqlSqlCommand {
 
+    private final NodeHandler handler;
+
     private String completeSql;
 
-    public ComQueryCommand(byte[] mysqlBytes, String sql) {
-        this(mysqlBytes);
+    public ComQueryCommand(byte[] mysqlBytes, String sql, NodeHandler handler) {
+        this(mysqlBytes, handler);
         this.completeSql = sql;
     }
 
-    public ComQueryCommand(byte[] mysqlBytes) {
+    public ComQueryCommand(byte[] mysqlBytes, NodeHandler handler) {
         super(mysqlBytes);
+        this.handler = handler;
     }
 
     @Override
@@ -74,17 +80,19 @@ public class ComQueryCommand extends MysqlSqlCommand {
      */
     private void invokeSql(String sql, List<MysqlResponse> result) {
         // 解析sql为执行计划
-        List<MysqlPlan> mysqlPlans = PlanUtil.analysisSqlToPlan(sql);
+        List<SqlPlan> sqlPlans = PlanUtil.analysisSqlToPlan(sql);
         // 执行计划为空, 返回执行成功,无信息
-        if (CollectionUtil.isEmpty(mysqlPlans)) {
+        if (CollectionUtil.isEmpty(sqlPlans)) {
             result.add(new OkResponse(SqlTypeEnum.NULL));
             return;
         }
 
-        PlanInvoker planInvoker = new PlanInvoker(mysqlPlans);
         NodeInvokeResult execute;
         try {
-            execute = planInvoker.execute();
+            execute = PlanInvoker.execute(sql, mysqlInvokeCommand -> {
+                CallNode callNode = handler.makeNode(mysqlInvokeCommand);
+                return callNode.call(new JSONObject());
+            });
         } catch (AssertException e) {
             LogUtil.error(this, e, "sql:" + sql + "\n");
             throw e;

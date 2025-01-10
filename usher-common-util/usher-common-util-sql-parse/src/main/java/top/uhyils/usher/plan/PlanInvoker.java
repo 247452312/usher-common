@@ -13,8 +13,8 @@ import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.content.CallerUserInfo;
 import top.uhyils.usher.enums.FieldTypeEnum;
 import top.uhyils.usher.pojo.FieldInfo;
-import top.uhyils.usher.pojo.MysqlInvokeCommand;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.SqlInvokeCommand;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.PlanUtil;
 
@@ -35,7 +35,7 @@ public class PlanInvoker {
      *
      * @return 每个执行计划的结果 key->执行计划id value->执行计划执行结果
      */
-    public static NodeInvokeResult execute(String sql, Map<String, String> headers, Function<MysqlInvokeCommand, NodeInvokeResult> handler) {
+    public static NodeInvokeResult execute(String sql, Map<String, String> headers, Function<SqlInvokeCommand, NodeInvokeResult> handler) {
         return execute(sql, headers, new JSONObject(), handler);
     }
 
@@ -44,7 +44,7 @@ public class PlanInvoker {
      *
      * @return 每个执行计划的结果 key->执行计划id value->执行计划执行结果
      */
-    public static NodeInvokeResult execute(String sql, Function<MysqlInvokeCommand, NodeInvokeResult> handler) {
+    public static NodeInvokeResult execute(String sql, Function<SqlInvokeCommand, NodeInvokeResult> handler) {
         return execute(sql, new HashMap<>(16), new JSONObject(), handler);
     }
 
@@ -55,20 +55,20 @@ public class PlanInvoker {
      *
      * @return 每个执行计划的结果
      */
-    public static NodeInvokeResult execute(String sql, Map<String, String> headers, JSONObject params, Function<MysqlInvokeCommand, NodeInvokeResult> handler) {
+    public static NodeInvokeResult execute(String sql, Map<String, String> headers, JSONObject params, Function<SqlInvokeCommand, NodeInvokeResult> handler) {
 
         // 解析sql为执行计划
-        List<MysqlPlan> plans = PlanUtil.analysisSqlToPlan(sql);
+        List<SqlPlan> plans = PlanUtil.analysisSqlToPlan(sql);
         // 初始化参数
         Map<Long, NodeInvokeResult> planParamMap = makeFirstParam(params);
 
         NodeInvokeResult lastResult = null;
         // 补全并执行
-        for (MysqlPlan mysqlPlan : plans) {
-            mysqlPlan.complete(planParamMap, handler);
-            NodeInvokeResult invoke = mysqlPlan.invoke(headers);
+        for (SqlPlan sqlPlan : plans) {
+            sqlPlan.complete(planParamMap, handler);
+            NodeInvokeResult invoke = sqlPlan.invoke(headers);
             lastResult = invoke;
-            planParamMap.put(mysqlPlan.getId(), invoke);
+            planParamMap.put(sqlPlan.getId(), invoke);
         }
         return lastResult;
     }

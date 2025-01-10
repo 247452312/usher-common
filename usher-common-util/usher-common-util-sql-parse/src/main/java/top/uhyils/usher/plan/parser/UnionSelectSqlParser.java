@@ -8,8 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import top.uhyils.usher.plan.MysqlPlan;
 import top.uhyils.usher.plan.PlanFactory;
+import top.uhyils.usher.plan.SqlPlan;
 
 /**
  * union解释器
@@ -22,19 +22,19 @@ public class UnionSelectSqlParser extends AbstractSelectSqlParser {
 
 
     @Override
-    public List<MysqlPlan> doParse(SQLSelectStatement sql, Map<String, String> headers) {
+    public List<SqlPlan> doParse(SQLSelectStatement sql, Map<String, String> headers) {
 
         SQLUnionQuery query = (SQLUnionQuery) sql.getSelect().getQuery();
         List<SQLSelectQuery> relations = query.getRelations();
         relations = parseToNoUnion(relations);
-        List<List<MysqlPlan>> relationResultList = new ArrayList<>();
+        List<List<SqlPlan>> relationResultList = new ArrayList<>();
         /*将union子部分分裂为单个语句,单独查询*/
         for (SQLSelectQuery relation : relations) {
-            List<MysqlPlan> relationMysqlPlans = reExecute(relation.toString(), headers, mysqlPlans -> mysqlPlans);
-            relationResultList.add(relationMysqlPlans);
+            List<SqlPlan> relationSqlPlans = reExecute(relation.toString(), headers, sqlPlans -> sqlPlans);
+            relationResultList.add(relationSqlPlans);
         }
-        List<Long> planIds = relationResultList.stream().map(t -> t.get(t.size() - 1)).map(MysqlPlan::getId).collect(Collectors.toList());
-        List<MysqlPlan> result = relationResultList.stream().flatMap(Collection::stream).collect(Collectors.toList());
+        List<Long> planIds = relationResultList.stream().map(t -> t.get(t.size() - 1)).map(SqlPlan::getId).collect(Collectors.toList());
+        List<SqlPlan> result = relationResultList.stream().flatMap(Collection::stream).collect(Collectors.toList());
         /*添加组合结果的plan*/
         result.add(PlanFactory.buildUnionSelectSqlPlan(headers, planIds));
         return result;

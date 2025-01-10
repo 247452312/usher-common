@@ -3,7 +3,7 @@ package top.uhyils.usher.pojo;
 import com.alibaba.fastjson.JSONArray;
 import java.io.Serializable;
 import java.util.List;
-import top.uhyils.usher.plan.MysqlPlan;
+import top.uhyils.usher.plan.SqlPlan;
 
 /**
  * @author uhyils <247452312@qq.com>
@@ -24,13 +24,13 @@ public class NodeInvokeResult implements Serializable {
     /**
      * 来源执行计划
      */
-    private MysqlPlan sourcePlan;
+    private SqlPlan sourcePlan;
 
-    public NodeInvokeResult(MysqlPlan sourcePlan) {
+    public NodeInvokeResult(SqlPlan sourcePlan) {
         this.sourcePlan = sourcePlan;
     }
 
-    public static NodeInvokeResult build(List<FieldInfo> fieldInfos, JSONArray result, MysqlPlan plan) {
+    public static NodeInvokeResult build(List<FieldInfo> fieldInfos, JSONArray result, SqlPlan plan) {
         NodeInvokeResult build = new NodeInvokeResult(plan);
         build.setFieldInfos(fieldInfos);
         build.setResult(result);
@@ -54,11 +54,11 @@ public class NodeInvokeResult implements Serializable {
         this.result = result;
     }
 
-    public MysqlPlan getSourcePlan() {
+    public SqlPlan getSourcePlan() {
         return sourcePlan;
     }
 
-    public void setSourcePlan(MysqlPlan sourcePlan) {
+    public void setSourcePlan(SqlPlan sourcePlan) {
         this.sourcePlan = sourcePlan;
     }
 }

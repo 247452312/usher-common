@@ -25,7 +25,7 @@ public class SqlTableSourceBinaryTreePool extends AbstractObjectPool<SqlTableSou
     private static final Integer DEFAULT_SIZE = 1000;
 
     private SqlTableSourceBinaryTreePool() {
-        super(Integer.parseInt(System.getProperty("mysql.plan.table.pool.size", DEFAULT_SIZE.toString())), SqlTableSourceBinaryTreeInfo.class);
+        super(Integer.parseInt(System.getProperty("sql.plan.table.pool.size", DEFAULT_SIZE.toString())), SqlTableSourceBinaryTreeInfo.class);
     }
 
     public static SqlTableSourceBinaryTreePool getInstance() {

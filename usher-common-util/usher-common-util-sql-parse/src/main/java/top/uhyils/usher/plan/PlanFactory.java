@@ -23,7 +23,7 @@ import top.uhyils.usher.plan.query.impl.RightJoinSqlPlanImpl;
 import top.uhyils.usher.plan.query.impl.UnionSqlPlanImpl;
 import top.uhyils.usher.plan.update.UpdateSqlPlanImpl;
 import top.uhyils.usher.pojo.SqlTableSourceBinaryTreeInfo;
-import top.uhyils.usher.sql.MySQLSelectItem;
+import top.uhyils.usher.sql.UsherSQLSelectItem;
 
 /**
  * @author uhyils <247452312@qq.com>
@@ -58,7 +58,7 @@ public class PlanFactory {
     }
 
 
-    public static AbstractResultMappingPlan buildResultMappingPlan(Map<String, String> headers, MysqlPlan lastMainPlan, List<MySQLSelectItem> selectList) {
+    public static AbstractResultMappingPlan buildResultMappingPlan(Map<String, String> headers, SqlPlan lastMainPlan, List<UsherSQLSelectItem> selectList) {
         return new ResultMappingPlanImpl(headers, lastMainPlan, selectList);
     }
 
@@ -68,21 +68,21 @@ public class PlanFactory {
     }
 
 
-    public static MysqlPlan buildUnionSelectSqlPlan(Map<String, String> headers, List<Long> planIds) {
+    public static SqlPlan buildUnionSelectSqlPlan(Map<String, String> headers, List<Long> planIds) {
         return new UnionSqlPlanImpl(headers, planIds);
     }
 
 
-    public static MysqlPlan buildBinarySqlPlan(Map<String, String> headers, SQLExpr leftExpr, SQLBinaryOperator operator, SQLExpr rightExpr) {
+    public static SqlPlan buildBinarySqlPlan(Map<String, String> headers, SQLExpr leftExpr, SQLBinaryOperator operator, SQLExpr rightExpr) {
         return new BinarySqlPlanImpl(headers, leftExpr, operator, rightExpr);
     }
 
 
-    public static MysqlPlan buildDeleteSqlPlan(SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers, Map<String, Object> params) {
+    public static SqlPlan buildDeleteSqlPlan(SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers, Map<String, Object> params) {
         return new DeleteSqlPlanImpl(froms, headers, params);
     }
 
-    public static MysqlPlan buildUpdateSql(SqlTableSourceBinaryTreeInfo froms, Map<String, String> itemMap, Map<String, String> headers, Map<String, Object> params) {
+    public static SqlPlan buildUpdateSql(SqlTableSourceBinaryTreeInfo froms, Map<String, String> itemMap, Map<String, String> headers, Map<String, Object> params) {
         return new UpdateSqlPlanImpl(froms, itemMap, headers, params);
     }
 }

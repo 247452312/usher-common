@@ -27,10 +27,10 @@ import java.util.function.Function;
 import top.uhyils.usher.annotation.NotNull;
 import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.content.CallerUserInfo;
-import top.uhyils.usher.plan.MysqlPlan;
+import top.uhyils.usher.plan.SqlPlan;
 import top.uhyils.usher.pojo.SqlTableSourceBinaryTreeInfo;
 import top.uhyils.usher.pojo.SqlTableSourceBinaryTreePool;
-import top.uhyils.usher.sql.MySqlListExpr;
+import top.uhyils.usher.sql.UsherSqlListExpr;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.CollectionUtil;
 
@@ -57,7 +57,7 @@ public abstract class AbstractSqlParser implements SqlParser {
      *
      * @return
      */
-    protected List<SQLBinaryOpExpr> parseSQLExprWhere(List<MysqlPlan> plans, SQLExpr where, Map<String, String> headers) {
+    protected List<SQLBinaryOpExpr> parseSQLExprWhere(List<SqlPlan> plans, SQLExpr where, Map<String, String> headers) {
         if (where == null) {
             return null;
         }
@@ -69,18 +69,18 @@ public abstract class AbstractSqlParser implements SqlParser {
             SQLInSubQueryExpr sqlInSubQueryExpr = (SQLInSubQueryExpr) where;
             SQLExpr expr = sqlInSubQueryExpr.getExpr();
             SQLSelect subQuery = sqlInSubQueryExpr.getSubQuery();
-            List<MysqlPlan> mysqlPlans = reExecute(subQuery.toString(), headers, (Consumer<List<MysqlPlan>>) plans::addAll);
-            Asserts.assertTrue(CollectionUtil.isNotEmpty(mysqlPlans), "解析plan为空:{}", subQuery);
-            plans.addAll(mysqlPlans);
-            MysqlPlan mysqlPlan = mysqlPlans.get(0);
-            return Collections.singletonList(new SQLBinaryOpExpr(expr, SQLBinaryOperator.Equality, new MySqlCharExpr("&" + mysqlPlan.getId())));
+            List<SqlPlan> sqlPlans = reExecute(subQuery.toString(), headers, (Consumer<List<SqlPlan>>) plans::addAll);
+            Asserts.assertTrue(CollectionUtil.isNotEmpty(sqlPlans), "解析plan为空:{}", subQuery);
+            plans.addAll(sqlPlans);
+            SqlPlan sqlPlan = sqlPlans.get(0);
+            return Collections.singletonList(new SQLBinaryOpExpr(expr, SQLBinaryOperator.Equality, new MySqlCharExpr("&" + sqlPlan.getId())));
         }
         if (where instanceof SQLInListExpr) {
             SQLInListExpr sqlInListExpr = (SQLInListExpr) where;
             SQLExpr expr = sqlInListExpr.getExpr();
             List<SQLExpr> targetList = sqlInListExpr.getTargetList();
-            MySqlListExpr mySqlListExpr = new MySqlListExpr(targetList);
-            return Collections.singletonList(new SQLBinaryOpExpr(expr, SQLBinaryOperator.Equality, mySqlListExpr));
+            UsherSqlListExpr usherSqlListExpr = new UsherSqlListExpr(targetList);
+            return Collections.singletonList(new SQLBinaryOpExpr(expr, SQLBinaryOperator.Equality, usherSqlListExpr));
         }
         Asserts.throwException("sql_where解析错误,没有找到解析类型:{}", where);
         return null;
@@ -92,7 +92,7 @@ public abstract class AbstractSqlParser implements SqlParser {
      * @param fromSql
      * @param sqlExecuteFunction sql解析成一个执行计划之后需要做什么
      */
-    protected <T> T reExecute(String fromSql, Map<String, String> headers, Function<List<MysqlPlan>, T> sqlExecuteFunction) {
+    protected <T> T reExecute(String fromSql, Map<String, String> headers, Function<List<SqlPlan>, T> sqlExecuteFunction) {
         // 检查解析器是否初始化
         checkInterpreters();
         SQLSelectStatement fromSqlStatement = (SQLSelectStatement) new MySqlStatementParser(fromSql).parseStatement();
@@ -105,12 +105,12 @@ public abstract class AbstractSqlParser implements SqlParser {
      * @param fromSqlStatement
      * @param sqlExecuteFunction sql解析成一个执行计划之后需要做什么
      */
-    protected <T> T reExecute(SQLSelectStatement fromSqlStatement, Map<String, String> headers, Function<List<MysqlPlan>, T> sqlExecuteFunction) {
+    protected <T> T reExecute(SQLSelectStatement fromSqlStatement, Map<String, String> headers, Function<List<SqlPlan>, T> sqlExecuteFunction) {
         // 检查解析器是否初始化
         checkInterpreters();
         for (AbstractSelectSqlParser selectInterpreter : selectInterpreters) {
             if (selectInterpreter.canParse(fromSqlStatement)) {
-                List<MysqlPlan> parse = selectInterpreter.parse(fromSqlStatement, headers);
+                List<SqlPlan> parse = selectInterpreter.parse(fromSqlStatement, headers);
                 return sqlExecuteFunction.apply(parse);
             }
         }
@@ -124,13 +124,13 @@ public abstract class AbstractSqlParser implements SqlParser {
      * @param fromSql
      * @param reExecute
      */
-    protected List<MysqlPlan> reExecute(String fromSql, Map<String, String> headers, Consumer<List<MysqlPlan>> reExecute) {
+    protected List<SqlPlan> reExecute(String fromSql, Map<String, String> headers, Consumer<List<SqlPlan>> reExecute) {
         //检查解析器是否初始化
         checkInterpreters();
         SQLSelectStatement fromSqlStatement = (SQLSelectStatement) new MySqlStatementParser(fromSql).parseStatement();
         for (AbstractSelectSqlParser selectInterpreter : selectInterpreters) {
             if (selectInterpreter.canParse(fromSqlStatement)) {
-                List<MysqlPlan> parse = selectInterpreter.parse(fromSqlStatement, headers);
+                List<SqlPlan> parse = selectInterpreter.parse(fromSqlStatement, headers);
                 reExecute.accept(parse);
                 return parse;
             }
@@ -146,7 +146,7 @@ public abstract class AbstractSqlParser implements SqlParser {
      * @param from
      */
     @NotNull
-    protected SqlTableSourceBinaryTreeInfo transFrom(List<MysqlPlan> plans, SQLTableSource from, List<SQLBinaryOpExpr> where, Map<String, String> headers) {
+    protected SqlTableSourceBinaryTreeInfo transFrom(List<SqlPlan> plans, SQLTableSource from, List<SQLBinaryOpExpr> where, Map<String, String> headers) {
         if (from == null) {
             // 无from语句,默认字段为@@前缀的系统变量, 并且如果from为空,则默认查询dual表
             SQLExprTableSource dual = new SQLExprTableSource(new SQLPropertyExpr(CallNodeContent.DUAL_DATABASES, "dual"), null);
@@ -176,10 +176,10 @@ public abstract class AbstractSqlParser implements SqlParser {
             SQLExprTableSource sqlExprTableSource = reExecute(from.toString(), headers, parse -> {
                 Asserts.assertTrue(CollectionUtil.isNotEmpty(parse), "解析plan为空:{}", from.toString());
                 plans.addAll(parse);
-                MysqlPlan lastPlan = parse.get(parse.size() - 1);
+                SqlPlan lastPlan = parse.get(parse.size() - 1);
                 long lastPlanId = lastPlan.getId();
-                CallerUserInfo mysqlTcpLink = CallNodeContent.CALLER_INFO.get();
-                return new SQLExprTableSource(new SQLPropertyExpr(mysqlTcpLink.getDatabaseName(), "&" + lastPlanId), from.getAlias());
+                CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
+                return new SQLExprTableSource(new SQLPropertyExpr(callerUserInfo.getDatabaseName(), "&" + lastPlanId), from.getAlias());
             });
             return pool.getOrCreateObject(sqlExprTableSource, where);
         } else {
@@ -187,7 +187,7 @@ public abstract class AbstractSqlParser implements SqlParser {
         }
     }
 
-    private List<SQLBinaryOpExpr> parseSqlBinaryOpExprWhere(List<MysqlPlan> plans, SQLBinaryOpExpr whereSqlBinaryOpExpr, List<SQLBinaryOpExpr> sqlBinaryOpExprs, Map<String, String> headers) {
+    private List<SQLBinaryOpExpr> parseSqlBinaryOpExprWhere(List<SqlPlan> plans, SQLBinaryOpExpr whereSqlBinaryOpExpr, List<SQLBinaryOpExpr> sqlBinaryOpExprs, Map<String, String> headers) {
         SQLExpr left = whereSqlBinaryOpExpr.getLeft();
         SQLExpr right = whereSqlBinaryOpExpr.getRight();
         if (whereSqlBinaryOpExpr.getOperator().isRelational() || whereSqlBinaryOpExpr.getOperator() == SQLBinaryOperator.LessThanOrEqualOrGreaterThan) {
@@ -196,9 +196,9 @@ public abstract class AbstractSqlParser implements SqlParser {
                 return sqlBinaryOpExprs;
             }
             if (right instanceof SQLQueryExpr) {
-                List<MysqlPlan> mysqlPlans = reExecute(right.toString(), headers, (Consumer<List<MysqlPlan>>) plans::addAll);
-                MysqlPlan lastMysqlPlan = mysqlPlans.get(mysqlPlans.size() - 1);
-                SQLBinaryOpExpr sqlBinaryOpExpr = new SQLBinaryOpExpr(left, whereSqlBinaryOpExpr.getOperator(), new MySqlCharExpr("&" + lastMysqlPlan.getId()));
+                List<SqlPlan> sqlPlans = reExecute(right.toString(), headers, (Consumer<List<SqlPlan>>) plans::addAll);
+                SqlPlan lastSqlPlan = sqlPlans.get(sqlPlans.size() - 1);
+                SQLBinaryOpExpr sqlBinaryOpExpr = new SQLBinaryOpExpr(left, whereSqlBinaryOpExpr.getOperator(), new MySqlCharExpr("&" + lastSqlPlan.getId()));
                 sqlBinaryOpExprs.add(sqlBinaryOpExpr);
                 return sqlBinaryOpExprs;
             }

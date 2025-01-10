@@ -2,15 +2,16 @@ package top.uhyils.usher.mysql.handler;
 
 import java.util.List;
 import top.uhyils.usher.annotation.NotNull;
+import top.uhyils.usher.mysql.pojo.DTO.CompanyInfo;
 import top.uhyils.usher.mysql.pojo.DTO.TableDTO;
-import top.uhyils.usher.mysql.pojo.cqe.MysqlInvokeCommand;
 import top.uhyils.usher.mysql.pojo.cqe.TableQuery;
 import top.uhyils.usher.mysql.pojo.cqe.UserQuery;
 import top.uhyils.usher.mysql.pojo.cqe.impl.MysqlAuthCommand;
 import top.uhyils.usher.mysql.pojo.response.MysqlResponse;
 import top.uhyils.usher.node.DatabaseInfo;
-import top.uhyils.usher.pojo.DTO.UserDTO;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.SqlGlobalVariables;
+import top.uhyils.usher.pojo.SqlInvokeCommand;
 import top.uhyils.usher.pojo.cqe.query.BlackQuery;
 
 /**
@@ -47,7 +48,7 @@ public interface MysqlServiceHandler {
      *
      * @return
      */
-    NodeInvokeResult invokeInterface(MysqlInvokeCommand command);
+    NodeInvokeResult invokeCallNode(SqlInvokeCommand command);
 
     /**
      * 执行节点
@@ -57,7 +58,7 @@ public interface MysqlServiceHandler {
      * @return
      */
     @NotNull
-    NodeInvokeResult invokeSingleQuerySql(MysqlInvokeCommand command);
+    NodeInvokeResult invokeSingleQuerySql(SqlInvokeCommand command);
 
 
     /**
@@ -67,7 +68,7 @@ public interface MysqlServiceHandler {
      *
      * @return
      */
-    List<UserDTO> queryUser(UserQuery userQuery);
+    List<CompanyInfo> queryUser(UserQuery userQuery);
 
     /**
      * 查询调用的表的信息
@@ -77,5 +78,22 @@ public interface MysqlServiceHandler {
      * @return
      */
     List<TableDTO> queryTable(TableQuery tableQuery);
+
+    /**
+     * 系统变量
+     *
+     * @return
+     */
+    SqlGlobalVariables findMysqlGlobalVariables();
+
+    /**
+     * 根据公司id和数据库名查询对应表
+     *
+     * @param companyId
+     * @param database
+     *
+     * @return
+     */
+    List<TableDTO> findTableByCompanyAndDatabase(Long companyId, String database);
 
 }

@@ -32,28 +32,19 @@ public class CallNodeContent {
     public static final List<String> SYS_DATABASE = new ArrayList<>();
 
     /**
-     * mysql版本
+     * sql版本
      */
     public static final String VERSION = "5.7.36";
 
-    /**
-     * 协议结尾
-     */
-    public static final String END_OF_PROTO = "mysql_native_password";
-
-    /**
-     * path中的分隔符
-     */
-    public static final String PATH_SEPARATOR = "/";
 
     /**
      * 默认库名称
      */
     public static final String CATALOG_NAME = "def";
 
-    public static final String MYSQL_YES = "Y";
+    public static final String SQL_YES = "Y";
 
-    public static final String MYSQL_NO = "N";
+    public static final String SQL_NO = "N";
 
     /**
      * 入参构造的表的表名默认值

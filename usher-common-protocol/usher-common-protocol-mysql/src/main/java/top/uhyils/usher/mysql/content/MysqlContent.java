@@ -14,6 +14,10 @@ public class MysqlContent {
 
 
     /**
+     * 协议结尾
+     */
+    public static final String END_OF_PROTO = "mysql_native_password";
+    /**
      * 当前连接的mysql信息
      */
     public static final UsherThreadLocal<MysqlTcpLink> MYSQL_TCP_INFO = new UsherThreadLocal<>();

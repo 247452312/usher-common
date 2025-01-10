@@ -1,8 +1,8 @@
 package top.uhyils.usher;
 
 import org.junit.jupiter.api.Test;
-import top.uhyils.usher.mysql.util.PlanUtil;
 import top.uhyils.usher.util.Asserts;
+import top.uhyils.usher.util.PlanUtil;
 
 /**
  * @author uhyils <247452312@qq.com>

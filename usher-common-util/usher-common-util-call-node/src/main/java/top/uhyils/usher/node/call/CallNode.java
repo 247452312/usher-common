@@ -3,7 +3,9 @@ package top.uhyils.usher.node.call;
 import com.alibaba.fastjson.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
+import top.uhyils.usher.node.DatabaseInfo;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.TableInfo;
 
 /**
  * 执行节点
@@ -30,4 +32,19 @@ public interface CallNode {
     default NodeInvokeResult call(JSONObject params) {
         return call(new HashMap<>(16), params);
     }
+
+
+    /**
+     * 将节点信息转换为数据库信息
+     *
+     * @return
+     */
+    DatabaseInfo changeToDatabaseInfo();
+
+    /**
+     * 将节点信息转换为数据库信息
+     *
+     * @return
+     */
+    TableInfo changeToTableInfo();
 }

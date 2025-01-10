@@ -9,7 +9,7 @@ import java.util.Map;
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2023年08月20日 13时14分
  */
-public abstract class BinarySqlPlan extends AbstractMysqlSqlPlan {
+public abstract class BinarySqlPlan extends AbstractSqlSqlPlan {
 
     protected final SQLExpr leftExpr;
 

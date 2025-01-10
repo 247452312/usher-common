@@ -1,8 +1,8 @@
 package top.uhyils.usher.mysql.pojo.plan.impl;
 
 import java.util.Map;
-import top.uhyils.usher.mysql.content.MysqlContent;
-import top.uhyils.usher.mysql.pojo.entity.MysqlTcpLink;
+import top.uhyils.usher.content.CallNodeContent;
+import top.uhyils.usher.content.CallerUserInfo;
 import top.uhyils.usher.mysql.pojo.plan.UsePlan;
 import top.uhyils.usher.pojo.NodeInvokeResult;
 
@@ -19,8 +19,8 @@ public class UseSqlPlanImpl extends UsePlan {
 
     @Override
     public NodeInvokeResult invoke(Map<String, String> headers) {
-        MysqlTcpLink mysqlTcpLink = MysqlContent.MYSQL_TCP_INFO.get();
-        mysqlTcpLink.setDatabase(database);
+        CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
+        callerUserInfo.setDatabaseName(database);
         return new NodeInvokeResult(this);
     }
 }

@@ -1,19 +1,23 @@
 package top.uhyils.usher.mysql.enums;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import top.uhyils.usher.annotation.NotNull;
+import top.uhyils.usher.content.CallNodeContent;
+import top.uhyils.usher.content.CallerUserInfo;
 import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.pojo.DTO.ExprParseResultInfo;
-import top.uhyils.usher.mysql.pojo.DTO.FieldInfo;
-import top.uhyils.usher.mysql.pojo.DTO.NodeInvokeResult;
 import top.uhyils.usher.mysql.pojo.entity.MysqlTcpLink;
 import top.uhyils.usher.mysql.util.MysqlUtil;
 import top.uhyils.usher.pojo.DTO.UserDTO;
+import top.uhyils.usher.pojo.FieldInfo;
+import top.uhyils.usher.pojo.NodeInvokeResult;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.StringUtil;
 
@@ -45,8 +49,8 @@ public enum MysqlMethodEnum {
             return null;
         } else {
             // count中为字段名称
-            List<Map<String, Object>> result = parentInvokeResult.getResult();
-            long size = result.stream().filter(t -> t.containsKey(fieldName) && t.get(fieldName) != null).count();
+            JSONArray result = parentInvokeResult.getResult();
+            long size = result.stream().filter(t -> ((JSONObject) t).containsKey(fieldName) && ((JSONObject) t).get(fieldName) != null).count();
             List<Map<String, Object>> maps = new ArrayList<>();
             Map<String, Object> e = new HashMap<>();
             e.put(fieldName, size);
@@ -138,8 +142,8 @@ public enum MysqlMethodEnum {
             return null;
         } else {
             // count中为字段名称
-            List<Map<String, Object>> result = parentInvokeResult.getResult();
-            long sum = result.stream().filter(t -> t.containsKey(fieldName) && t.get(fieldName) != null).mapToLong(t -> (long) t.get(fieldName)).sum();
+            JSONArray result = parentInvokeResult.getResult();
+            long sum = result.stream().map(t -> (JSONObject) t).filter(t -> t.containsKey(fieldName) && t.get(fieldName) != null).mapToLong(t -> (long) t.get(fieldName)).sum();
             List<Map<String, Object>> maps = new ArrayList<>();
             Map<String, Object> item = new HashMap<>();
             item.put(fieldName, sum);
@@ -151,25 +155,25 @@ public enum MysqlMethodEnum {
 
         List<Map<String, Object>> maps = new ArrayList<>();
         Map<String, Object> item = new HashMap<>();
-        item.put(fieldName, MysqlContent.VERSION);
+        item.put(fieldName, CallNodeContent.VERSION);
         maps.add(item);
         return maps;
     }),
     DATABASE("database", 0, String.class, false, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
-        MysqlTcpLink value = MysqlContent.MYSQL_TCP_INFO.get();
+        CallerUserInfo value = CallNodeContent.CALLER_INFO.get();
 
         List<Map<String, Object>> maps = new ArrayList<>();
         Map<String, Object> item = new HashMap<>();
-        item.put(fieldName, value.getDatabase());
+        item.put(fieldName, value.getDatabaseName());
         maps.add(item);
         return maps;
     }),
     SCHEMA("schema", 0, String.class, false, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
-        MysqlTcpLink value = MysqlContent.MYSQL_TCP_INFO.get();
+        CallerUserInfo value = CallNodeContent.CALLER_INFO.get();
 
         List<Map<String, Object>> maps = new ArrayList<>();
         Map<String, Object> item = new HashMap<>();
-        item.put(fieldName, value.getDatabase());
+        item.put(fieldName, value.getDatabaseName());
         maps.add(item);
         return maps;
     }),
@@ -186,24 +190,25 @@ public enum MysqlMethodEnum {
     LOWER("lower", 1, String.class, false, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
         SQLExpr argName = arguments.get(0);
         List<Map<String, Object>> maps = new ArrayList<>();
-        for (Map<String, Object> objectMap : parentInvokeResult.getResult()) {
+        for (Object objectMap : parentInvokeResult.getResult()) {
             Map<String, Object> item = new HashMap<>();
-            item.put(fieldName, objectMap.get(argName));
+            item.put(fieldName, ((JSONObject) objectMap).get(argName));
             maps.add(item);
         }
         return maps;
     }),
     GROUP_CONCAT("group_concat", 1, String.class, true, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
-        List<Map<String, Object>> parentResult = parentInvokeResult.getResult();
+        JSONArray parentResult = parentInvokeResult.getResult();
         List<Map<String, Object>> result = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder();
         // 遍历每一行
-        for (Map<String, Object> lineResult : parentResult) {
+        for (Object lineResult : parentResult) {
+
             for (SQLExpr argument : arguments) {
                 // todo 这里需要处理argument 如果argument有前缀之类的(a.name)就需要单独处理
 
-                Object o = lineResult.get(argument.toString());
+                Object o = ((JSONObject) lineResult).get(argument.toString());
                 sb.append(o);
             }
         }
@@ -293,7 +298,7 @@ public enum MysqlMethodEnum {
      */
     @NotNull
     public FieldInfo makeFieldInfo(String dbName, String tableName, String tableRealName, Integer index, String fieldName) {
-        return FieldTypeEnum.makeFieldInfo(dbName, tableName, tableRealName, resultType, index, fieldName);
+        return FieldTypeToByteEnum.makeFieldInfo(dbName, tableName, tableRealName, resultType, index, fieldName);
     }
 
     /**

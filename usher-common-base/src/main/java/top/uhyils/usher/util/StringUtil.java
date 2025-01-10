@@ -92,6 +92,56 @@ public final class StringUtil {
     }
 
     /**
+     * 判断指定字符串是不是json格式
+     *
+     * @param value
+     *
+     * @return
+     */
+    public static Boolean isJson(String value) {
+        if (isEmpty(value)) {
+            return false;
+        }
+        if (value.startsWith("{") && value.endsWith("}")) {
+            return true;
+        }
+        if (value.startsWith("[") && value.endsWith("]")) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断指定字符串是不是jsonObject格式
+     *
+     * @param value
+     *
+     * @return
+     */
+    public static Boolean isJsonObject(String value) {
+        Boolean json = isJson(value);
+        if (!json) {
+            return false;
+        }
+        return value.startsWith("{") && value.endsWith("}");
+    }
+
+    /**
+     * 判断指定字符串是不是jsonArray格式
+     *
+     * @param value
+     *
+     * @return
+     */
+    public static Boolean isJsonArray(String value) {
+        Boolean json = isJson(value);
+        if (!json) {
+            return false;
+        }
+        return value.startsWith("[") && value.endsWith("]");
+    }
+
+    /**
      * <p>
      * 首字母转换小写
      * </p>

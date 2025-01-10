@@ -3,7 +3,7 @@ package top.uhyils.usher.pojo;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import top.uhyils.usher.util.MysqlUtil;
+import top.uhyils.usher.enums.FieldTypeEnum;
 
 /**
  * @author uhyils <247452312@qq.com>
@@ -12,20 +12,6 @@ import top.uhyils.usher.util.MysqlUtil;
  */
 public class FieldInfo {
 
-    /**
-     * 目录名称(恒为def)
-     */
-    private static final byte[] DIR_NAME = MysqlUtil.varString("def");
-
-    /**
-     * 字符编码
-     */
-    private static final byte[] CHAR_SET = new byte[]{(byte) 0xff, 0x00};
-
-    /**
-     * 填充值
-     */
-    private static final byte[] FILL_VALUE = new byte[]{0x0c};
 
     /**
      * 库名
@@ -66,7 +52,7 @@ public class FieldInfo {
     /**
      * 列类型
      */
-    private Class<?> fieldType;
+    private FieldTypeEnum fieldType;
 
     /**
      * 列标志
@@ -79,7 +65,7 @@ public class FieldInfo {
     private byte accuracy;
 
 
-    public FieldInfo(String dbName, String tableName, String tableRealName, String fieldName, String fieldRealName, int length, int index, Class<?> fieldType, short fieldMark, byte accuracy) {
+    public FieldInfo(String dbName, String tableName, String tableRealName, String fieldName, String fieldRealName, int length, int index, FieldTypeEnum fieldType, short fieldMark, byte accuracy) {
         this.dbName = dbName;
         this.tableName = tableName;
         this.tableRealName = tableRealName;
@@ -125,6 +111,34 @@ public class FieldInfo {
      */
     public FieldInfo copyWithNewFieldName(Integer index) {
         return copyWithNewFieldName(this.fieldName + "(" + index + ")");
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public String getTableRealName() {
+        return tableRealName;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public FieldTypeEnum getFieldType() {
+        return fieldType;
+    }
+
+    public short getFieldMark() {
+        return fieldMark;
+    }
+
+    public byte getAccuracy() {
+        return accuracy;
+    }
+
+    public String getFieldRealName() {
+        return fieldRealName;
     }
 
     public String getFieldName() {

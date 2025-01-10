@@ -21,20 +21,20 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import top.uhyils.usher.annotation.Nullable;
-import top.uhyils.usher.plan.AbstractMysqlSqlPlan;
+import top.uhyils.usher.plan.AbstractSqlSqlPlan;
 import top.uhyils.usher.pojo.FieldInfo;
-import top.uhyils.usher.pojo.MysqlInvokeCommand;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.SqlInvokeCommand;
 import top.uhyils.usher.pojo.SqlTableSourceBinaryTreeInfo;
 import top.uhyils.usher.util.Asserts;
-import top.uhyils.usher.util.MysqlStringUtil;
+import top.uhyils.usher.util.SqlStringUtil;
 import top.uhyils.usher.util.StringUtil;
 
 /**
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2023年07月31日 15时35分
  */
-public abstract class JoinSqlPlan extends AbstractMysqlSqlPlan {
+public abstract class JoinSqlPlan extends AbstractSqlSqlPlan {
 
     /**
      * 左边执行计划id
@@ -126,7 +126,7 @@ public abstract class JoinSqlPlan extends AbstractMysqlSqlPlan {
                 }
             }
         } else if (left instanceof SQLCharExpr) {
-            leftLineItem = MysqlStringUtil.cleanQuotation(((SQLCharExpr) left).getText());
+            leftLineItem = SqlStringUtil.cleanQuotation(((SQLCharExpr) left).getText());
         } else if (left instanceof SQLIdentifierExpr) {
             leftLineItem = ((SQLIdentifierExpr) left).getName();
         } else if (left instanceof SQLNumberExpr) {
@@ -140,7 +140,7 @@ public abstract class JoinSqlPlan extends AbstractMysqlSqlPlan {
     }
 
     @Override
-    public void complete(Map<Long, NodeInvokeResult> planArgs, Function<MysqlInvokeCommand, NodeInvokeResult> handler) {
+    public void complete(Map<Long, NodeInvokeResult> planArgs, Function<SqlInvokeCommand, NodeInvokeResult> handler) {
         this.leftResult = planArgs.get(leftResultPlanId);
         this.rightResult = planArgs.get(rightResultPlanId);
     }

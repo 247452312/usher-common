@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import top.uhyils.usher.enums.ParseEnum;
-import top.uhyils.usher.plan.MysqlPlan;
+import top.uhyils.usher.plan.SqlPlan;
 import top.uhyils.usher.plan.parser.SqlParser;
 
 /**
@@ -21,24 +21,24 @@ public final class PlanUtil {
 
 
     /**
-     * 解析mysql语句
+     * 解析sql语句
      *
-     * @param sql mysql语句
+     * @param sql sql语句
      *
      * @return
      */
-    public static List<MysqlPlan> analysisSqlToPlan(String sql) {
+    public static List<SqlPlan> analysisSqlToPlan(String sql) {
         return analysisSqlToPlan(sql, new HashMap<>());
     }
 
     /**
-     * 解析mysql语句
+     * 解析sql语句
      *
-     * @param sql mysql语句
+     * @param sql sql语句
      *
      * @return
      */
-    public static List<MysqlPlan> analysisSqlToPlan(String sql, Map<String, String> headers) {
+    public static List<SqlPlan> analysisSqlToPlan(String sql, Map<String, String> headers) {
         SQLStatement sqlStatement = new MySqlStatementParser(sql).parseStatement();
         List<SqlParser> beans = ParseEnum.allParser(null);
         for (SqlParser bean : beans) {

@@ -3,7 +3,7 @@ package top.uhyils.usher.plan.query;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import top.uhyils.usher.plan.AbstractMysqlSqlPlan;
+import top.uhyils.usher.plan.AbstractSqlSqlPlan;
 
 /**
  * union语句执行计划
@@ -11,7 +11,7 @@ import top.uhyils.usher.plan.AbstractMysqlSqlPlan;
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2022年08月26日 15时56分
  */
-public abstract class UnionSqlPlan extends AbstractMysqlSqlPlan {
+public abstract class UnionSqlPlan extends AbstractSqlSqlPlan {
 
     /**
      * 左边结果

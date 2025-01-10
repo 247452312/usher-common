@@ -2,17 +2,16 @@ package top.uhyils.usher.mysql.pojo.cqe.impl;
 
 import java.util.Collections;
 import java.util.List;
-import top.uhyils.usher.mysql.content.MysqlContent;
+import top.uhyils.usher.content.CallNodeContent;
+import top.uhyils.usher.content.CallerUserInfo;
 import top.uhyils.usher.mysql.enums.ClientPowerEnum;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.handler.MysqlServiceHandler;
 import top.uhyils.usher.mysql.pojo.cqe.AbstractMysqlCommand;
-import top.uhyils.usher.mysql.pojo.entity.MysqlTcpLink;
 import top.uhyils.usher.mysql.pojo.response.MysqlResponse;
 import top.uhyils.usher.mysql.util.MysqlUtil;
 import top.uhyils.usher.mysql.util.Proto;
 import top.uhyils.usher.util.Asserts;
-import top.uhyils.usher.util.SpringUtil;
 import top.uhyils.usher.util.StringUtil;
 
 
@@ -78,9 +77,9 @@ public class MysqlAuthCommand extends AbstractMysqlCommand {
     private String pluginName;
 
 
-    public MysqlAuthCommand(byte[] mysqlBytes) {
+    public MysqlAuthCommand(byte[] mysqlBytes, MysqlServiceHandler handler) {
         super(mysqlBytes);
-        this.service = SpringUtil.getBean(MysqlServiceHandler.class);
+        this.service = handler;
     }
 
     @Override
@@ -183,8 +182,8 @@ public class MysqlAuthCommand extends AbstractMysqlCommand {
         if (MysqlUtil.hasAbility(this.abilityFlags, ClientPowerEnum.CLIENT_CONNECT_WITH_DB.getCode())) {
             this.dbName = proto.get_null_str();
             if (StringUtil.isNotEmpty(dbName)) {
-                MysqlTcpLink mysqlTcpLink = MysqlContent.MYSQL_TCP_INFO.get();
-                mysqlTcpLink.setDatabase(dbName);
+                CallerUserInfo value = CallNodeContent.CALLER_INFO.get();
+                value.setDatabaseName(dbName);
             }
         }
 

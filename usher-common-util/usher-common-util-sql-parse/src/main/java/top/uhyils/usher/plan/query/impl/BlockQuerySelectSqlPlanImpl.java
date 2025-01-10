@@ -15,14 +15,14 @@ import java.util.Objects;
 import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.enums.QuerySqlTypeEnum;
 import top.uhyils.usher.plan.query.BlockQuerySelectSqlPlan;
-import top.uhyils.usher.pojo.InvokeCommandBuilder;
-import top.uhyils.usher.pojo.MysqlInvokeCommand;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.SqlInvokeCommand;
+import top.uhyils.usher.pojo.SqlInvokeCommandBuilder;
 import top.uhyils.usher.pojo.SqlTableSourceBinaryTreeInfo;
 import top.uhyils.usher.sql.ExprParseResultInfo;
 import top.uhyils.usher.util.Asserts;
-import top.uhyils.usher.util.MysqlUtil;
 import top.uhyils.usher.util.StringUtil;
+import top.uhyils.usher.util.UsherSqlUtil;
 
 /**
  * 简单sql执行计划
@@ -40,12 +40,12 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
 
     @Override
     public NodeInvokeResult invoke(Map<String, String> headers) {
-        InvokeCommandBuilder invokeCommandBuilder = new InvokeCommandBuilder();
-        invokeCommandBuilder.type(QuerySqlTypeEnum.QUERY);
-        invokeCommandBuilder.addArgs(params);
-        invokeCommandBuilder.addHeader(headers);
+        SqlInvokeCommandBuilder sqlInvokeCommandBuilder = new SqlInvokeCommandBuilder();
+        sqlInvokeCommandBuilder.type(QuerySqlTypeEnum.QUERY);
+        sqlInvokeCommandBuilder.addArgs(params);
+        sqlInvokeCommandBuilder.addHeader(headers);
         SQLExprTableSource tableSource = froms.getTableSource();
-        invokeCommandBuilder.addAlias(tableSource.getAlias());
+        sqlInvokeCommandBuilder.addAlias(tableSource.getAlias());
         SQLPropertyExpr expr = (SQLPropertyExpr) tableSource.getExpr();
         String owner = expr.getOwnernName();
         String tableName = expr.getName();
@@ -72,7 +72,7 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
                 String leftStr = null;
                 // 这里解析符号左边的参数
                 if (left.toString().startsWith("&")) {
-                    ExprParseResultInfo<Object> leftResponseInfo = MysqlUtil.parse(left, lastAllPlanResult, lastNodeInvokeResult);
+                    ExprParseResultInfo<Object> leftResponseInfo = UsherSqlUtil.parse(left, lastAllPlanResult, lastNodeInvokeResult);
                     leftStr = leftResponseInfo.get().toString();
                 } else {
                     leftStr = left.toString();
@@ -80,7 +80,7 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
                 List<Object> rightObjs = new ArrayList<>();
                 // 这里解析符号右边的参数
                 if (right instanceof MySqlCharExpr && ((MySqlCharExpr) right).getText().startsWith("&")) {
-                    ExprParseResultInfo<Object> rightResponseInfo = MysqlUtil.parse(right, lastAllPlanResult, lastNodeInvokeResult);
+                    ExprParseResultInfo<Object> rightResponseInfo = UsherSqlUtil.parse(right, lastAllPlanResult, lastNodeInvokeResult);
                     rightObjs.addAll(rightResponseInfo.getListResult());
                 } else {
                     rightObjs.add(right.toString());
@@ -88,17 +88,17 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
                 whereParams.put(leftStr, rightObjs);
             }
         }
-        invokeCommandBuilder.addArgs(whereParams);
+        sqlInvokeCommandBuilder.addArgs(whereParams);
         String database = CallNodeContent.CALLER_INFO.get().getDatabaseName();
         if (owner != null) {
-            invokeCommandBuilder.fillDatabase(owner);
+            sqlInvokeCommandBuilder.fillDatabase(owner);
         } else if (StringUtil.isNotEmpty(database)) {
-            invokeCommandBuilder.fillDatabase(database);
+            sqlInvokeCommandBuilder.fillDatabase(database);
         } else {
             Asserts.throwException("No database selected");
         }
-        invokeCommandBuilder.fillTable(tableName);
-        MysqlInvokeCommand build = invokeCommandBuilder.build();
+        sqlInvokeCommandBuilder.fillTable(tableName);
+        SqlInvokeCommand build = sqlInvokeCommandBuilder.build();
         NodeInvokeResult nodeInvokeResult = handler.apply(build);
         nodeInvokeResult.setSourcePlan(this);
         if (!haveResult) {

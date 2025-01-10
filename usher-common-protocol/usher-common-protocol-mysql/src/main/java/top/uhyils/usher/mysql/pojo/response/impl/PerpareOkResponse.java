@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import top.uhyils.usher.mysql.pojo.DTO.FieldInfo;
 import top.uhyils.usher.mysql.pojo.response.AbstractMysqlResponse;
 import top.uhyils.usher.mysql.util.MysqlUtil;
+import top.uhyils.usher.pojo.FieldInfo;
 
 
 /**
@@ -71,7 +71,7 @@ public class PerpareOkResponse extends AbstractMysqlResponse {
      * @return
      */
     private byte[] toFields() {
-        List<byte[]> collect = fields.stream().map(FieldInfo::toFieldBytes).collect(Collectors.toList());
+        List<byte[]> collect = fields.stream().map(MysqlUtil::toFieldBytes).collect(Collectors.toList());
         return MysqlUtil.mergeListBytes(collect);
     }
 
@@ -81,7 +81,7 @@ public class PerpareOkResponse extends AbstractMysqlResponse {
      * @return
      */
     private byte[] toParams() {
-        List<byte[]> collect = param.stream().map(FieldInfo::toFieldBytes).collect(Collectors.toList());
+        List<byte[]> collect = param.stream().map(MysqlUtil::toFieldBytes).collect(Collectors.toList());
         return MysqlUtil.mergeListBytes(collect);
     }
 

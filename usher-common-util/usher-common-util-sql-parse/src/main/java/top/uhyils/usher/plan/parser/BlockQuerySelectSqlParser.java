@@ -25,11 +25,11 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 import top.uhyils.usher.annotation.NotNull;
 import top.uhyils.usher.plan.BinarySqlPlanImpl;
-import top.uhyils.usher.plan.MysqlPlan;
 import top.uhyils.usher.plan.PlanFactory;
+import top.uhyils.usher.plan.SqlPlan;
 import top.uhyils.usher.plan.query.MethodInvokePlan;
 import top.uhyils.usher.pojo.SqlTableSourceBinaryTreeInfo;
-import top.uhyils.usher.sql.MySQLSelectItem;
+import top.uhyils.usher.sql.UsherSQLSelectItem;
 import top.uhyils.usher.util.Asserts;
 
 
@@ -53,16 +53,16 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
     }
 
     @Override
-    protected List<MysqlPlan> doParse(SQLSelectStatement sql, Map<String, String> headers) {
+    protected List<SqlPlan> doParse(SQLSelectStatement sql, Map<String, String> headers) {
         return parseSelect(sql.getSelect(), headers);
     }
 
-    private List<MySQLSelectItem> parseSelectList(List<MysqlPlan> planResults, List<SQLSelectItem> selectList, Map<String, String> headers) {
-        List<MySQLSelectItem> result = new ArrayList<>();
+    private List<UsherSQLSelectItem> parseSelectList(List<SqlPlan> planResults, List<SQLSelectItem> selectList, Map<String, String> headers) {
+        List<UsherSQLSelectItem> result = new ArrayList<>();
         for (int i = 0; i < selectList.size(); i++) {
             SQLSelectItem t = selectList.get(i);
             // 解析语句块
-            MySQLSelectItem sqlSelectItems = parseSelectListItem(planResults, i, headers, t);
+            UsherSQLSelectItem sqlSelectItems = parseSelectListItem(planResults, i, headers, t);
             result.add(sqlSelectItems);
         }
         return result;
@@ -79,21 +79,21 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
      * @return
      */
     @Nullable
-    private MySQLSelectItem parseSelectListItem(List<MysqlPlan> result, int index, Map<String, String> headers, SQLSelectItem selectItem) {
+    private UsherSQLSelectItem parseSelectListItem(List<SqlPlan> result, int index, Map<String, String> headers, SQLSelectItem selectItem) {
         SQLExpr expr = selectItem.getExpr();
         // 查询参数的,或者查询常规,直接返回
         if (expr instanceof SQLVariantRefExpr || (expr instanceof SQLPropertyExpr && ((SQLPropertyExpr) expr).getOwner() instanceof SQLVariantRefExpr)
             || expr instanceof SQLPropertyExpr || expr instanceof SQLIdentifierExpr || expr instanceof SQLAllColumnExpr) {
-            return new MySQLSelectItem(expr, selectItem.getAlias(), selectItem);
+            return new UsherSQLSelectItem(expr, selectItem.getAlias(), selectItem);
         }
         if (expr instanceof SQLQueryExpr) {
             String sql = expr.toString();
-            MysqlPlan newPlan = reExecute(sql, headers, plans -> {
+            SqlPlan newPlan = reExecute(sql, headers, plans -> {
                 Asserts.assertTrue(plans != null && plans.size() == 1, "子查询不唯一");
                 return plans.get(0);
             });
             result.add(newPlan);
-            return new MySQLSelectItem(new SQLIdentifierExpr("&" + newPlan.getId()), selectItem.getAlias(), selectItem);
+            return new UsherSQLSelectItem(new SQLIdentifierExpr("&" + newPlan.getId()), selectItem.getAlias(), selectItem);
         }
         if (expr instanceof SQLMethodInvokeExpr) {
             SQLMethodInvokeExpr sqlMethodInvokeExpr = (SQLMethodInvokeExpr) expr;
@@ -102,17 +102,17 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
             List<SQLExpr> newArguments = parseMethodArgument(result, headers, arguments);
             MethodInvokePlan newPlan = PlanFactory.buildMethodInvokePlan(headers, index, methodName, newArguments, sqlMethodInvokeExpr);
             result.add(newPlan);
-            return new MySQLSelectItem(new SQLIdentifierExpr("&" + newPlan.getId()), selectItem.getAlias(), selectItem, newPlan.getMethodEnum());
+            return new UsherSQLSelectItem(new SQLIdentifierExpr("&" + newPlan.getId()), selectItem.getAlias(), selectItem, newPlan.getMethodEnum());
         }
         if (expr instanceof SQLBinaryOpExpr) {
             SQLBinaryOpExpr binaryOpExpr = (SQLBinaryOpExpr) expr;
             List<SQLExpr> sqlExprs = parseMethodArgument(result, headers, Arrays.asList(binaryOpExpr.getLeft(), binaryOpExpr.getRight()));
             BinarySqlPlanImpl newPlan = new BinarySqlPlanImpl(headers, sqlExprs.get(0), binaryOpExpr.getOperator(), sqlExprs.get(1));
             result.add(newPlan);
-            return new MySQLSelectItem(new SQLIdentifierExpr("&" + newPlan.getId()), selectItem.getAlias(), selectItem);
+            return new UsherSQLSelectItem(new SQLIdentifierExpr("&" + newPlan.getId()), selectItem.getAlias(), selectItem);
         }
         if (expr instanceof SQLCharExpr) {
-            return new MySQLSelectItem(expr, selectItem.getAlias(), selectItem);
+            return new UsherSQLSelectItem(expr, selectItem.getAlias(), selectItem);
         }
         Asserts.throwException("查询报错,子查询类型找不到:{},内容为:{}", expr.getClass().getName(), selectItem.toString());
         return null;
@@ -124,7 +124,7 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
      * @param plans
      * @param arguments
      */
-    private List<SQLExpr> parseMethodArgument(List<MysqlPlan> plans, Map<String, String> headers, List<SQLExpr> arguments) {
+    private List<SQLExpr> parseMethodArgument(List<SqlPlan> plans, Map<String, String> headers, List<SQLExpr> arguments) {
         List<SQLExpr> result = new ArrayList<>(arguments.size());
         for (int i = 0; i < arguments.size(); i++) {
             SQLExpr argument = arguments.get(i);
@@ -133,7 +133,7 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
                 String methodName = sqlMethodInvokeExpr.getMethodName();
                 List<SQLExpr> argumentsItem = sqlMethodInvokeExpr.getArguments();
                 List<SQLExpr> newArgumentsItem = parseMethodArgument(plans, headers, argumentsItem);
-                MysqlPlan newPlan = PlanFactory.buildMethodInvokePlan(headers, i, methodName, newArgumentsItem, sqlMethodInvokeExpr);
+                SqlPlan newPlan = PlanFactory.buildMethodInvokePlan(headers, i, methodName, newArgumentsItem, sqlMethodInvokeExpr);
                 plans.add(newPlan);
                 result.add(new MySqlCharExpr("&" + newPlan.getId()));
             } else if (argument instanceof SQLBinaryOpExpr) {
@@ -143,7 +143,7 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
                 SQLExpr right = binaryOpExpr.getRight();
                 List<SQLExpr> leftSqlExpr = parseMethodArgument(plans, headers, Arrays.asList(left));
                 List<SQLExpr> rightSqlExpr = parseMethodArgument(plans, headers, Arrays.asList(right));
-                MysqlPlan newPlan = PlanFactory.buildBinarySqlPlan(headers, leftSqlExpr.get(leftSqlExpr.size() - 1), operator, rightSqlExpr.get(rightSqlExpr.size() - 1));
+                SqlPlan newPlan = PlanFactory.buildBinarySqlPlan(headers, leftSqlExpr.get(leftSqlExpr.size() - 1), operator, rightSqlExpr.get(rightSqlExpr.size() - 1));
                 plans.add(newPlan);
                 result.add(new MySqlCharExpr("&" + newPlan.getId()));
             } else {
@@ -161,12 +161,12 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
      * @return 此次制作执行计划新生成的执行计划
      */
     @NotNull
-    private List<MysqlPlan> makeMainPlan(List<MysqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
-        List<MysqlPlan> resultPlan = new ArrayList<>();
+    private List<SqlPlan> makeMainPlan(List<SqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
+        List<SqlPlan> resultPlan = new ArrayList<>();
         if (froms.isLevel()) {
-            MysqlPlan mysqlPlan = PlanFactory.buildBlockQuerySelectSqlPlan(froms, headers, new HashMap<>());
-            resultPlan.add(mysqlPlan);
-            plans.add(mysqlPlan);
+            SqlPlan sqlPlan = PlanFactory.buildBlockQuerySelectSqlPlan(froms, headers, new HashMap<>());
+            resultPlan.add(sqlPlan);
+            plans.add(sqlPlan);
             return resultPlan;
         } else {
             JoinType joinType = froms.getJoinType();
@@ -186,53 +186,53 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
     }
 
     @NotNull
-    private List<MysqlPlan> makeRightJoin(List<MysqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
-        List<MysqlPlan> resultPlan = new ArrayList<>();
-        List<MysqlPlan> rightPlan = makeMainPlan(plans, froms.getRightTree(), headers);
+    private List<SqlPlan> makeRightJoin(List<SqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
+        List<SqlPlan> resultPlan = new ArrayList<>();
+        List<SqlPlan> rightPlan = makeMainPlan(plans, froms.getRightTree(), headers);
         resultPlan.addAll(rightPlan);
         plans.addAll(rightPlan);
-        List<MysqlPlan> leftPlan = makeMainPlan(plans, froms.getLeftTree(), headers);
+        List<SqlPlan> leftPlan = makeMainPlan(plans, froms.getLeftTree(), headers);
         resultPlan.addAll(leftPlan);
         plans.addAll(leftPlan);
 
         long leftPlanId = leftPlan.get(leftPlan.size() - 1).getId();
         long rightPlanId = rightPlan.get(rightPlan.size() - 1).getId();
 
-        MysqlPlan sqlPlan = PlanFactory.buildRightJoinSqlPlan(headers, froms, leftPlanId, rightPlanId);
+        SqlPlan sqlPlan = PlanFactory.buildRightJoinSqlPlan(headers, froms, leftPlanId, rightPlanId);
         resultPlan.add(sqlPlan);
         plans.add(sqlPlan);
         return resultPlan;
     }
 
     @NotNull
-    private List<MysqlPlan> makeLeftJoin(List<MysqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
-        List<MysqlPlan> resultPlan = new ArrayList<>();
-        List<MysqlPlan> leftPlan = makeMainPlan(plans, froms.getLeftTree(), headers);
+    private List<SqlPlan> makeLeftJoin(List<SqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
+        List<SqlPlan> resultPlan = new ArrayList<>();
+        List<SqlPlan> leftPlan = makeMainPlan(plans, froms.getLeftTree(), headers);
         resultPlan.addAll(leftPlan);
-        List<MysqlPlan> rightPlan = makeMainPlan(plans, froms.getRightTree(), headers);
+        List<SqlPlan> rightPlan = makeMainPlan(plans, froms.getRightTree(), headers);
         resultPlan.addAll(rightPlan);
 
         long leftPlanId = leftPlan.get(leftPlan.size() - 1).getId();
         long rightPlanId = rightPlan.get(rightPlan.size() - 1).getId();
-        MysqlPlan sqlPlan = PlanFactory.buildLeftJoinSqlPlan(headers, froms, leftPlanId, rightPlanId);
+        SqlPlan sqlPlan = PlanFactory.buildLeftJoinSqlPlan(headers, froms, leftPlanId, rightPlanId);
         resultPlan.add(sqlPlan);
         plans.add(sqlPlan);
         return resultPlan;
     }
 
     @NotNull
-    private List<MysqlPlan> makeInnerJoin(List<MysqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
-        List<MysqlPlan> resultPlan = new ArrayList<>();
-        List<MysqlPlan> leftPlan = makeMainPlan(plans, froms.getLeftTree(), headers);
+    private List<SqlPlan> makeInnerJoin(List<SqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
+        List<SqlPlan> resultPlan = new ArrayList<>();
+        List<SqlPlan> leftPlan = makeMainPlan(plans, froms.getLeftTree(), headers);
         resultPlan.addAll(leftPlan);
         plans.addAll(leftPlan);
-        List<MysqlPlan> rightPlan = makeMainPlan(plans, froms.getRightTree(), headers);
+        List<SqlPlan> rightPlan = makeMainPlan(plans, froms.getRightTree(), headers);
         resultPlan.addAll(rightPlan);
         plans.addAll(rightPlan);
         long leftPlanId = leftPlan.get(leftPlan.size() - 1).getId();
         long rightPlanId = rightPlan.get(rightPlan.size() - 1).getId();
 
-        MysqlPlan sqlPlan = PlanFactory.buildInnerJoinSqlPlan(headers, froms, leftPlanId, rightPlanId);
+        SqlPlan sqlPlan = PlanFactory.buildInnerJoinSqlPlan(headers, froms, leftPlanId, rightPlanId);
         resultPlan.add(sqlPlan);
         plans.add(sqlPlan);
         return resultPlan;
@@ -251,19 +251,19 @@ public class BlockQuerySelectSqlParser extends AbstractSelectSqlParser {
      *
      * @return
      */
-    private List<MysqlPlan> parseSelect(SQLSelect select, Map<String, String> headers) {
+    private List<SqlPlan> parseSelect(SQLSelect select, Map<String, String> headers) {
         // 1. 处理where中的子查询
         MySqlSelectQueryBlock query = (MySqlSelectQueryBlock) select.getQuery();
-        ArrayList<MysqlPlan> plans = new ArrayList<>();
+        ArrayList<SqlPlan> plans = new ArrayList<>();
         List<SQLBinaryOpExpr> where = parseSQLExprWhere(plans, query.getWhere(), headers);
 
         // 2.处理from后需要查询的条件
-        List<MysqlPlan> mainPlans = makeMainPlan(plans, transFrom(plans, query.getFrom(), where, headers), headers);
+        List<SqlPlan> mainPlans = makeMainPlan(plans, transFrom(plans, query.getFrom(), where, headers), headers);
 
         // 3.selectList 查询字段的子查询
-        MysqlPlan lastMainPlan = mainPlans.get(mainPlans.size() - 1);
+        SqlPlan lastMainPlan = mainPlans.get(mainPlans.size() - 1);
         // 解析sql语句中字段
-        List<MySQLSelectItem> selectList = parseSelectList(plans, query.getSelectList(), headers);
+        List<UsherSQLSelectItem> selectList = parseSelectList(plans, query.getSelectList(), headers);
         // 添加结果字段映射节点
         plans.add(PlanFactory.buildResultMappingPlan(headers, lastMainPlan, selectList));
 

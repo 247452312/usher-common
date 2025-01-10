@@ -12,17 +12,22 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.io.HexDump;
 import top.uhyils.usher.annotation.NotNull;
+import top.uhyils.usher.content.CallNodeContent;
+import top.uhyils.usher.content.CallerUserInfo;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.pojo.DTO.ExprParseResultInfo;
 import top.uhyils.usher.pojo.FieldInfo;
 import top.uhyils.usher.pojo.NodeInvokeResult;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.LogUtil;
+import top.uhyils.usher.util.SqlStringUtil;
+import top.uhyils.usher.util.UsherSqlUtil;
 
 /**
  * mysql协议解析方法
@@ -37,6 +42,20 @@ public final class MysqlUtil {
      */
     private static final String QUOTES_PREFIX = "`";
 
+    /**
+     * 目录名称(恒为def)
+     */
+    private static final byte[] DIR_NAME = UsherSqlUtil.varString(CallNodeContent.CATALOG_NAME);
+
+    /**
+     * 字符编码
+     */
+    private static final byte[] CHAR_SET = new byte[]{(byte) 0xff, 0x00};
+
+    /**
+     * 填充值
+     */
+    private static final byte[] FILL_VALUE = new byte[]{0x0c};
 
     /**
      * 解析sql协议中请求类型
@@ -50,6 +69,62 @@ public final class MysqlUtil {
         Proto proto = new Proto(mysqlBytes, 4);
         long type = proto.getFixedInt(1);
         return MysqlCommandTypeEnum.parse(type);
+    }
+
+    public static byte[] toFieldBytes(FieldInfo fieldInfo) {
+        CallerUserInfo userInfo = CallNodeContent.CALLER_INFO.get();
+        List<byte[]> results = new ArrayList<>();
+        int count = 0;
+        // 目录名称
+        results.add(DIR_NAME);
+        count += DIR_NAME.length;
+        // 数据库名称
+        byte[] e = MysqlUtil.varString(fieldInfo.getDbName() != null ? fieldInfo.getDbName() : userInfo.getDatabaseName());
+        results.add(e);
+        count += e.length;
+        // 数据表名称
+        byte[] e1 = MysqlUtil.varString(fieldInfo.getTableName());
+        results.add(e1);
+        count += e1.length;
+        // 数据表原始名称
+        byte[] e2 = MysqlUtil.varString(fieldInfo.getTableRealName());
+        results.add(e2);
+        count += e2.length;
+        // 列字段名称
+        byte[] e3 = MysqlUtil.varString(fieldInfo.getFieldName());
+        results.add(e3);
+        count += e3.length;
+        // 列字段原始名称
+        byte[] e4 = MysqlUtil.varString(fieldInfo.getFieldRealName());
+        results.add(e4);
+        count += e4.length;
+        // 填充值
+        results.add(FILL_VALUE);
+        count += FILL_VALUE.length;
+        // 字符编码
+        results.add(CHAR_SET);
+        count += CHAR_SET.length;
+        // 列字段长度
+        byte[] e5 = new byte[]{MysqlUtil.toBytes(fieldInfo.getLength(), 1)[0], 0x00, 0x00, 0x00};
+        results.add(e5);
+        count += e5.length;
+        // 列字段类型
+        byte[] e6 = new byte[]{fieldInfo.getFieldType().getCode()};
+        results.add(e6);
+        count += e6.length;
+        // 列字段标志
+        byte[] e7 = MysqlUtil.toBytes(fieldInfo.getFieldMark(), 2);
+        results.add(e7);
+        count += e7.length;
+        // 整型值精度
+        byte[] e8 = new byte[]{fieldInfo.getAccuracy()};
+        results.add(e8);
+        count += e8.length;
+        // 填充值
+        byte[] e9 = {0x00, 0x00};
+        results.add(e9);
+        count += e9.length;
+        return MysqlUtil.mergeListBytes(results, count);
     }
 
 
@@ -480,7 +555,7 @@ public final class MysqlUtil {
      */
     @NotNull
     public static <T> ExprParseResultInfo<T> parse(SQLExpr arg, Map<Long, NodeInvokeResult> allResult, NodeInvokeResult parentInvokeResult) {
-        if (arg instanceof SQLCharExpr && StringUtil.cleanQuotation(((SQLCharExpr) arg).getText()).startsWith("&")) {
+        if (arg instanceof SQLCharExpr && SqlStringUtil.cleanQuotation(((SQLCharExpr) arg).getText()).startsWith("&")) {
             String planId = ((SQLCharExpr) arg).getText().substring(1);
             NodeInvokeResult nodeInvokeResult = allResult.get(Long.parseLong(planId));
             Asserts.assertTrue(nodeInvokeResult != null, "未找到临时变量对应的执行计划");

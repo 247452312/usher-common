@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import top.uhyils.usher.plan.MysqlPlan;
 import top.uhyils.usher.plan.PlanFactory;
+import top.uhyils.usher.plan.SqlPlan;
 import top.uhyils.usher.pojo.SqlTableSourceBinaryTreeInfo;
 
 /**
@@ -33,7 +33,7 @@ public class UpdateSqlParser extends AbstractSqlParser {
     }
 
     @Override
-    public List<MysqlPlan> parse(SQLStatement sql, Map<String, String> headers) {
+    public List<SqlPlan> parse(SQLStatement sql, Map<String, String> headers) {
         MySqlUpdateStatement updateSql = (MySqlUpdateStatement) sql;
         SQLExpr whereExpr = updateSql.getWhere();
         List<SQLUpdateSetItem> items = updateSql.getItems();
@@ -43,7 +43,7 @@ public class UpdateSqlParser extends AbstractSqlParser {
             SQLExpr value = item.getValue();
             itemMap.put(column.toString(), value.toString());
         }
-        List<MysqlPlan> plans = new ArrayList<>();
+        List<SqlPlan> plans = new ArrayList<>();
         List<SQLBinaryOpExpr> where = parseSQLExprWhere(plans, whereExpr, headers);
         SqlTableSourceBinaryTreeInfo sqlTableSourceBinaryTreeInfo = transFrom(plans, updateSql.getTableSource(), where, headers);
         makeMainPlan(plans, sqlTableSourceBinaryTreeInfo, itemMap, headers);
@@ -51,11 +51,11 @@ public class UpdateSqlParser extends AbstractSqlParser {
         return plans;
     }
 
-    private List<MysqlPlan> makeMainPlan(List<MysqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> itemMap, Map<String, String> headers) {
-        List<MysqlPlan> result = new ArrayList<>();
-        MysqlPlan mysqlPlan = PlanFactory.buildUpdateSql(froms, itemMap, headers, new HashMap<>());
-        plans.add(mysqlPlan);
-        result.add(mysqlPlan);
+    private List<SqlPlan> makeMainPlan(List<SqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> itemMap, Map<String, String> headers) {
+        List<SqlPlan> result = new ArrayList<>();
+        SqlPlan sqlPlan = PlanFactory.buildUpdateSql(froms, itemMap, headers, new HashMap<>());
+        plans.add(sqlPlan);
+        result.add(sqlPlan);
         return result;
     }
 }

@@ -4,6 +4,8 @@ package top.uhyils.usher.node;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,13 +15,16 @@ import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.content.CallerUserInfo;
 import top.uhyils.usher.context.LoginInfoHelper;
 import top.uhyils.usher.enums.FieldTypeEnum;
+import top.uhyils.usher.enums.QuerySqlTypeEnum;
+import top.uhyils.usher.handler.NodeHandler;
+import top.uhyils.usher.handler.impl.AbstractNodeHandler;
 import top.uhyils.usher.node.call.AbstractLeafNode;
 import top.uhyils.usher.node.call.CallNode;
 import top.uhyils.usher.node.call.SqlCallNode;
-import top.uhyils.usher.node.handler.MysqlServiceHandler;
+import top.uhyils.usher.pojo.CallInfo;
 import top.uhyils.usher.pojo.FieldInfo;
-import top.uhyils.usher.pojo.MysqlInvokeCommand;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.TableInfo;
 import top.uhyils.usher.util.Asserts;
 
 /**
@@ -28,72 +33,99 @@ import top.uhyils.usher.util.Asserts;
  */
 class MysqlCommandTest {
 
-    private MysqlServiceHandler handler = new MysqlServiceHandler() {
+    private static final String DEFAULT_TABLE_NAME = "defaultTable";
+
+    private NodeHandler handler = new AbstractNodeHandler() {
+
 
         @Override
-        public CallNode makeNode(MysqlInvokeCommand build) {
+        protected TableInfo findByDatabaseAndTable(String database, String table) {
+            TableInfo tableInfo = new TableInfo();
+            tableInfo.setNodeId(3213123L);
+            tableInfo.setDatabaseName(CallNodeContent.CATALOG_NAME);
+            tableInfo.setTableName(DEFAULT_TABLE_NAME);
+            tableInfo.setType("aaa");
+            CallInfo callInfo = new CallInfo();
+            callInfo.setSupportSqlTypes(Arrays.asList(QuerySqlTypeEnum.QUERY, QuerySqlTypeEnum.INSERT, QuerySqlTypeEnum.UPDATE, QuerySqlTypeEnum.DELETE));
+            Map<QuerySqlTypeEnum, JSONObject> params = new HashMap<>();
+            JSONObject value = new JSONObject();
+            value.put("url", "127.0.0.1:8001/action");
+            value.put("method", "POST");
+            params.put(QuerySqlTypeEnum.QUERY, value);
+            params.put(QuerySqlTypeEnum.INSERT, value);
+            params.put(QuerySqlTypeEnum.UPDATE, value);
+            params.put(QuerySqlTypeEnum.DELETE, value);
+            callInfo.setParams(params);
+
+            tableInfo.setCallInfo(callInfo);
+            return tableInfo;
+        }
+    };
+
+    @BeforeAll
+    static void beforeAll() {
+        LeafNodeFactory.addSupportType("aaa", (build, tableInfo) -> {
+
             String table = build.getTable();
+
             if (Objects.equals(table, "user")) {
-                return new AbstractLeafNode() {
+
+                return new AbstractLeafNode(build, tableInfo) {
 
                     @Override
                     public NodeInvokeResult call(Map<String, String> header, JSONObject params) {
                         List<FieldInfo> fieldInfos = new ArrayList<>();
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "id", "id", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "name", "name", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "id", "id", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "name", "name", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                         JSONArray result = new JSONArray();
                         return NodeInvokeResult.build(fieldInfos, result, null);
                     }
                 };
             } else if (Objects.equals(table, "rule")) {
-                return new AbstractLeafNode() {
+                return new AbstractLeafNode(build, tableInfo) {
 
                     @Override
                     public NodeInvokeResult call(Map<String, String> header, JSONObject params) {
                         List<FieldInfo> fieldInfos = new ArrayList<>();
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "id", "id", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "name", "name", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "user_id", "user_id", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "c_k", "c_k", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "k", "k", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "id", "id", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "name", "name", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "user_id", "user_id", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "c_k", "c_k", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "k", "k", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                         JSONArray result = new JSONArray();
                         return NodeInvokeResult.build(fieldInfos, result, null);
                     }
                 };
 
             } else if (Objects.equals(table, "uu2")) {
-                return new AbstractLeafNode() {
+                return new AbstractLeafNode(build, tableInfo) {
 
                     @Override
                     public NodeInvokeResult call(Map<String, String> header, JSONObject params) {
                         List<FieldInfo> fieldInfos = new ArrayList<>();
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "id", "id", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "name", "name", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "r2", "r2", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "id", "id", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "name", "name", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                        fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "r2", "r2", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                         JSONArray result = new JSONArray();
                         return NodeInvokeResult.build(fieldInfos, result, null);
                     }
                 };
             }
-            return new AbstractLeafNode() {
+            return new AbstractLeafNode(build, tableInfo) {
 
                 @Override
                 public NodeInvokeResult call(Map<String, String> header, JSONObject params) {
                     List<FieldInfo> fieldInfos = new ArrayList<>();
 
-                    fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "GRANTEE", "GRANTEE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                    fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "TABLE_CATALOG", "TABLE_CATALOG", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                    fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "PRIVILEGE_TYPE", "PRIVILEGE_TYPE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
-                    fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "IS_GRANTABLE", "IS_GRANTABLE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR.getClazz(), (short) 0, (byte) 0));
+                    fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "GRANTEE", "GRANTEE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                    fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "TABLE_CATALOG", "TABLE_CATALOG", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                    fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "PRIVILEGE_TYPE", "PRIVILEGE_TYPE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
+                    fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "IS_GRANTABLE", "IS_GRANTABLE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                     JSONArray result = new JSONArray();
                     return NodeInvokeResult.build(fieldInfos, result, null);
                 }
             };
-        }
-    };
-
-    @BeforeAll
-    static void beforeAll() {
+        });
         CallerUserInfo value = new CallerUserInfo();
         value.setDatabaseName("temp");
         value.setUserDTO(LoginInfoHelper.doGet());

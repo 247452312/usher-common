@@ -4,8 +4,8 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import top.uhyils.usher.enums.MysqlMethodEnum;
-import top.uhyils.usher.plan.AbstractMysqlSqlPlan;
+import top.uhyils.usher.enums.SqlMethodEnum;
+import top.uhyils.usher.plan.AbstractSqlSqlPlan;
 
 /**
  * 执行方法的执行计划
@@ -13,7 +13,7 @@ import top.uhyils.usher.plan.AbstractMysqlSqlPlan;
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2022年08月26日 15时57分
  */
-public abstract class MethodInvokePlan extends AbstractMysqlSqlPlan {
+public abstract class MethodInvokePlan extends AbstractSqlSqlPlan {
 
     /**
      * 此方法在语句中的位置
@@ -38,7 +38,7 @@ public abstract class MethodInvokePlan extends AbstractMysqlSqlPlan {
     /**
      * 方法
      */
-    protected MysqlMethodEnum methodEnum;
+    protected SqlMethodEnum methodEnum;
 
 
     protected MethodInvokePlan(Map<String, String> headers, Integer index, String methodName, List<SQLExpr> arguments, String asName) {
@@ -47,10 +47,10 @@ public abstract class MethodInvokePlan extends AbstractMysqlSqlPlan {
         this.methodName = methodName;
         this.arguments = arguments;
         this.asName = asName;
-        this.methodEnum = MysqlMethodEnum.parse(methodName, arguments.size());
+        this.methodEnum = SqlMethodEnum.parse(methodName, arguments.size());
     }
 
-    public MysqlMethodEnum getMethodEnum() {
+    public SqlMethodEnum getMethodEnum() {
         return methodEnum;
     }
 }

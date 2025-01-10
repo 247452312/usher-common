@@ -2,8 +2,9 @@ package top.uhyils.usher.mysql.pojo.cqe.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import top.uhyils.usher.handler.NodeHandler;
 import top.uhyils.usher.mysql.content.MysqlContent;
-import top.uhyils.usher.mysql.enums.FieldTypeEnum;
+import top.uhyils.usher.mysql.enums.FieldTypeToByteEnum;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.enums.PrepareMarkEnum;
 import top.uhyils.usher.mysql.pojo.DTO.PrepareInfo;
@@ -20,6 +21,8 @@ import top.uhyils.usher.mysql.util.Proto;
  */
 public class ComStmtExecuteCommand extends MysqlSqlCommand {
 
+    private final NodeHandler handler;
+
     /**
      * 预处理语句
      */
@@ -35,19 +38,19 @@ public class ComStmtExecuteCommand extends MysqlSqlCommand {
      */
     private List<Integer> placeholderIndexs;
 
-
     /**
      * 预处理语句标志位
      */
     private PrepareMarkEnum parse;
 
-    public ComStmtExecuteCommand(byte[] mysqlBytes) {
+    public ComStmtExecuteCommand(byte[] mysqlBytes, NodeHandler handler) {
         super(mysqlBytes);
+        this.handler = handler;
     }
 
     @Override
     public List<MysqlResponse> invoke() throws Exception {
-        ComQueryCommand comQueryRequest = new ComQueryCommand(mysqlBytes, sql);
+        ComQueryCommand comQueryRequest = new ComQueryCommand(mysqlBytes, sql, handler);
         return comQueryRequest.invoke();
     }
 
@@ -77,7 +80,7 @@ public class ComStmtExecuteCommand extends MysqlSqlCommand {
             List<PrepareParamInfo> params = new ArrayList<>(count);
             for (int i = 0; i < count; i++) {
                 long paramType = proto.getFixedInt(2);
-                FieldTypeEnum parse = FieldTypeEnum.parse((byte) paramType);
+                FieldTypeToByteEnum parse = FieldTypeToByteEnum.parse((byte) paramType);
                 Object paramValue = parse.invokeProto(proto);
                 PrepareParamInfo prepareParamInfo = new PrepareParamInfo(parse, paramValue);
                 params.add(prepareParamInfo);

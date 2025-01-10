@@ -3,14 +3,14 @@ package top.uhyils.usher.plan.query;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import top.uhyils.usher.plan.AbstractMysqlSqlPlan;
-import top.uhyils.usher.plan.MysqlPlan;
-import top.uhyils.usher.sql.MySQLSelectItem;
+import top.uhyils.usher.plan.AbstractSqlSqlPlan;
+import top.uhyils.usher.plan.SqlPlan;
+import top.uhyils.usher.sql.UsherSQLSelectItem;
 
 /**
  * 结果映射执行计划
  * <p>
- * 需要将子查询,mysql方法执行结果等整合到结果中
+ * 需要将子查询,sql方法执行结果等整合到结果中
  * <p>
  * 1. 多个字段映射成少字段
  * 例如
@@ -62,19 +62,19 @@ import top.uhyils.usher.sql.MySQLSelectItem;
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2022年08月26日 15时57分
  */
-public abstract class AbstractResultMappingPlan extends AbstractMysqlSqlPlan {
+public abstract class AbstractResultMappingPlan extends AbstractSqlSqlPlan {
 
     /**
      * 要映射成的几个字段
      */
-    protected final List<MySQLSelectItem> selectList;
+    protected final List<UsherSQLSelectItem> selectList;
 
     /**
      * 主sql执行计划
      */
-    protected final MysqlPlan lastMainPlan;
+    protected final SqlPlan lastMainPlan;
 
-    protected AbstractResultMappingPlan(Map<String, String> headers, MysqlPlan lastMainPlan, List<MySQLSelectItem> selectList) {
+    protected AbstractResultMappingPlan(Map<String, String> headers, SqlPlan lastMainPlan, List<UsherSQLSelectItem> selectList) {
         super(null, headers, new HashMap<>());
         this.selectList = selectList;
         this.lastMainPlan = lastMainPlan;

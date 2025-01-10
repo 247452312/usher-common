@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import top.uhyils.usher.plan.MysqlPlan;
 import top.uhyils.usher.plan.PlanFactory;
+import top.uhyils.usher.plan.SqlPlan;
 import top.uhyils.usher.pojo.SqlTableSourceBinaryTreeInfo;
 
 /**
@@ -33,10 +33,10 @@ public class DeleteSqlParser extends AbstractSqlParser {
     }
 
     @Override
-    public List<MysqlPlan> parse(SQLStatement sql, Map<String, String> headers) {
+    public List<SqlPlan> parse(SQLStatement sql, Map<String, String> headers) {
         SQLTableSource tableSource = ((MySqlDeleteStatement) sql).getTableSource();
         SQLExpr whereExpr = ((MySqlDeleteStatement) sql).getWhere();
-        List<MysqlPlan> plans = new ArrayList<>();
+        List<SqlPlan> plans = new ArrayList<>();
         List<SQLBinaryOpExpr> where = parseSQLExprWhere(plans, whereExpr, headers);
         SqlTableSourceBinaryTreeInfo sqlTableSourceBinaryTreeInfo = transFrom(plans, tableSource, where, headers);
         makeMainPlan(plans, sqlTableSourceBinaryTreeInfo, headers);
@@ -45,11 +45,11 @@ public class DeleteSqlParser extends AbstractSqlParser {
         //            Asserts.throwException("删除语句解析错误,未知的from语句类型:{},sql:{}", tableSource.getClass().getName(), tableSource.toString());
     }
 
-    private List<MysqlPlan> makeMainPlan(List<MysqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
-        List<MysqlPlan> result = new ArrayList<>();
-        MysqlPlan mysqlPlan = PlanFactory.buildDeleteSqlPlan(froms, headers, new HashMap<>());
-        plans.add(mysqlPlan);
-        result.add(mysqlPlan);
+    private List<SqlPlan> makeMainPlan(List<SqlPlan> plans, SqlTableSourceBinaryTreeInfo froms, Map<String, String> headers) {
+        List<SqlPlan> result = new ArrayList<>();
+        SqlPlan sqlPlan = PlanFactory.buildDeleteSqlPlan(froms, headers, new HashMap<>());
+        plans.add(sqlPlan);
+        result.add(sqlPlan);
         return result;
     }
 }

@@ -4,7 +4,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import java.util.List;
 import java.util.Map;
-import top.uhyils.usher.plan.MysqlPlan;
+import top.uhyils.usher.plan.SqlPlan;
 
 /**
  * 查询解释器
@@ -25,7 +25,7 @@ public abstract class AbstractSelectSqlParser extends AbstractSqlParser {
     }
 
     @Override
-    public List<MysqlPlan> parse(SQLStatement sql, Map<String, String> headers) {
+    public List<SqlPlan> parse(SQLStatement sql, Map<String, String> headers) {
         return doParse((SQLSelectStatement) sql, headers);
     }
 
@@ -46,7 +46,7 @@ public abstract class AbstractSelectSqlParser extends AbstractSqlParser {
      *
      * @return
      */
-    protected abstract List<MysqlPlan> doParse(SQLSelectStatement sql, Map<String, String> headers);
+    protected abstract List<SqlPlan> doParse(SQLSelectStatement sql, Map<String, String> headers);
 
 
 }

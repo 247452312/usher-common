@@ -1,21 +1,20 @@
 package top.uhyils.usher.mysql.pojo.cqe.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import top.uhyils.usher.enums.FieldTypeEnum;
 import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.enums.FieldMarkEnum;
-import top.uhyils.usher.mysql.enums.FieldTypeEnum;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.enums.MysqlServerStatusEnum;
-import top.uhyils.usher.mysql.pojo.DTO.FieldInfo;
 import top.uhyils.usher.mysql.pojo.cqe.AbstractMysqlCommand;
 import top.uhyils.usher.mysql.pojo.entity.MysqlTcpLink;
 import top.uhyils.usher.mysql.pojo.response.MysqlResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.ResultSetResponse;
-import top.uhyils.usher.util.SpringUtil;
+import top.uhyils.usher.pojo.FieldInfo;
 
 
 /**
@@ -39,12 +38,12 @@ public class ComStatisticsCommand extends AbstractMysqlCommand {
 
     public ComStatisticsCommand(byte[] mysqlBytes) {
         super(mysqlBytes);
-        root = SpringUtil.getProperty("mysql.db-name", "root");
+        root = System.getProperty("mysql.db-name", "root");
     }
 
     @Override
     public List<MysqlResponse> invoke() {
-        ArrayList<FieldInfo> fields = new ArrayList<>();
+        List<FieldInfo> fields = new ArrayList<>();
         MysqlTcpLink mysqlTcpLink = MysqlContent.MYSQL_TCP_INFO.get();
         fields.add(new FieldInfo(root, STATIC_TABLE_NAME, STATIC_TABLE_NAME, "运行时间", "time", 3, (int) mysqlTcpLink.index(), FieldTypeEnum.FIELD_TYPE_LONG, FieldMarkEnum.TIMESTAMP_FLAG
             .getCode(), (byte) 3));
@@ -53,8 +52,8 @@ public class ComStatisticsCommand extends AbstractMysqlCommand {
             .add(new FieldInfo(root, STATIC_TABLE_NAME, STATIC_TABLE_NAME, "每秒执行次数", "executions_per_second", 3, (int) mysqlTcpLink.index(), FieldTypeEnum.FIELD_TYPE_LONG, FieldMarkEnum.ZEROFILL_FLAG
                 .getCode(), (byte) 3));
 
-        List<Map<String, Object>> jsonArrayObj = new ArrayList<>(1);
-        Map<String, Object> jsonResult = new HashMap<>(2);
+        JSONArray jsonArrayObj = new JSONArray(1);
+        JSONObject jsonResult = new JSONObject(2);
         jsonResult.put("time", 0L);
         jsonResult.put("executions_per_second", 0L);
         jsonArrayObj.add(jsonResult);

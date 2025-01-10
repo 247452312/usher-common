@@ -1,7 +1,7 @@
 package top.uhyils.usher.mysql.pojo.DTO;
 
 
-import top.uhyils.usher.mysql.enums.FieldTypeEnum;
+import top.uhyils.usher.mysql.enums.FieldTypeToByteEnum;
 
 /**
  * @author uhyils <247452312@qq.com>
@@ -13,19 +13,19 @@ public class PrepareParamInfo {
     /**
      * 预处理参数类型
      */
-    private final FieldTypeEnum parse;
+    private final FieldTypeToByteEnum parse;
 
     /**
      * 预处理参数
      */
     private final Object paramValue;
 
-    public PrepareParamInfo(FieldTypeEnum parse, Object paramValue) {
+    public PrepareParamInfo(FieldTypeToByteEnum parse, Object paramValue) {
         this.parse = parse;
         this.paramValue = paramValue;
     }
 
-    public FieldTypeEnum getParse() {
+    public FieldTypeToByteEnum getParse() {
         return parse;
     }
 
