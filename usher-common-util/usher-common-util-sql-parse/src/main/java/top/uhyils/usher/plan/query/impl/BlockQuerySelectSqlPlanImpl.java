@@ -83,7 +83,7 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
                     ExprParseResultInfo<Object> rightResponseInfo = UsherSqlUtil.parse(right, lastAllPlanResult, lastNodeInvokeResult);
                     rightObjs.addAll(rightResponseInfo.getListResult());
                 } else {
-                    rightObjs.add(right.toString());
+                    rightObjs.add(StringUtil.trimTarget(right.toString(), "'"));
                 }
                 whereParams.put(leftStr, rightObjs);
             }
@@ -109,7 +109,6 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
         nodeInvokeResult = tileResultJson(nodeInvokeResult);
         return nodeInvokeResult;
     }
-
 
 
 }

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.RandomUtils;
 import top.uhyils.usher.content.CallNodeContent;
+import top.uhyils.usher.content.CallerUserInfo;
 import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.enums.MysqlServerStatusEnum;
 import top.uhyils.usher.mysql.pojo.entity.MysqlTcpLink;
@@ -37,7 +38,8 @@ public class AuthResponse extends AbstractMysqlResponse {
 
     @Override
     public String toResponseStr() {
-        return "认证成功," + MysqlTcpLink.findByCache().findUserDTO().getUsername();
+        CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
+        return "认证成功," + callerUserInfo.getUserDTO().getUsername();
     }
 
     /**

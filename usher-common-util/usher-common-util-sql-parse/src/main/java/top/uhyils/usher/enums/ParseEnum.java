@@ -1,6 +1,7 @@
 package top.uhyils.usher.enums;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import top.uhyils.usher.plan.parser.BlockQuerySelectSqlParser;
 import top.uhyils.usher.plan.parser.DeleteSqlParser;
@@ -49,7 +50,7 @@ public enum ParseEnum {
      *
      * @return
      */
-    public static List<SqlParser> allParser(List<SqlParser> list) {
+    public static List<SqlParser> allParser(Collection<SqlParser> list) {
         List<SqlParser> result;
         if (list == null) {
             result = new ArrayList<>();

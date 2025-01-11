@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -157,7 +156,7 @@ public abstract class AbstractSqlSqlPlan implements SqlSqlPlan {
         for (Object resultItem : result) {
             JSONObject resultItemJson = (JSONObject) resultItem;
 
-            Map<String, Object> newLine = new HashMap<>();
+            JSONObject newLine = new JSONObject();
             List<Map<String, Object>> newResultTemp = new ArrayList<>();
             // 初始只有一行
             newResultTemp.add(newLine);

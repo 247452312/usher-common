@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.enums.MysqlHandlerStatusEnum;
 import top.uhyils.usher.mysql.pojo.DTO.PrepareInfo;
-import top.uhyils.usher.pojo.DTO.UserDTO;
 import top.uhyils.usher.pojo.entity.base.AbstractEntity;
 
 /**
@@ -38,10 +37,6 @@ public class MysqlTcpLink extends AbstractEntity<ChannelId> {
      */
     private MysqlHandlerStatusEnum status = MysqlHandlerStatusEnum.UNKNOW;
 
-    /**
-     * 此次登录的用户
-     */
-    private UserDTO userDTO;
 
     /**
      * 密码 随机挑战数
@@ -101,13 +96,6 @@ public class MysqlTcpLink extends AbstractEntity<ChannelId> {
         index++;
     }
 
-    public UserDTO findUserDTO() {
-        return userDTO;
-    }
-
-    public void fillUserDTO(UserDTO userDTO) {
-        this.userDTO = userDTO;
-    }
 
     /**
      * mysql的登录状态往前走一步,未知->初见->登录->结束

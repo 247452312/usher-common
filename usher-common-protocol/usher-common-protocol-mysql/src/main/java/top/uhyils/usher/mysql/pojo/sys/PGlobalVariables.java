@@ -49,7 +49,7 @@ public class PGlobalVariables extends AbstractSysTable {
         if (!userOptional.isPresent()) {
             throw Asserts.makeException("未登录");
         }
-        String variableName = (String) params.get("variable_name");
+        List<Object> variableName = (List) params.get("variable_name");
         SqlGlobalVariables variables = handler.findMysqlGlobalVariables();
         JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(variables));
         JSONArray newResults = new JSONArray();

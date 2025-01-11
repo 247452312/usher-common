@@ -163,7 +163,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                     for (int i = 0; i < lastResult.size(); i++) {
                         Object o = ((JSONObject) lastResult.get(i)).get(lastFieldInfo.getFieldName());
                         if (newResultList.size() <= i) {
-                            newResultList.add(new HashMap<>(16));
+                            newResultList.add(new JSONObject(16));
                         }
                         JSONObject stringObjectMap = (JSONObject) newResultList.get(i);
                         stringObjectMap.put(finalName, o);
@@ -179,7 +179,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 JSONArray result = nodeInvokeResult.getResult();
                 Object needFieldResult = null;
                 if (CollectionUtil.isNotEmpty(result)) {
-                    JSONObject stringObjectMap = (JSONObject) result.get(0);
+                    Map<String, Object> stringObjectMap = (Map<String, Object>) result.get(0);
                     needFieldResult = stringObjectMap.get(specialLastFieldInfos.get(0).getFieldName());
                 }
                 for (Object objectMap : newResultList) {
@@ -189,7 +189,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
             } else if (needFieldStr.startsWith("@@") || needField.isGlobal()) {
                 // 如果存在查询系统变量,则默认至少有一行
                 if (CollectionUtil.isEmpty(newResultList)) {
-                    newResultList.add(new HashMap<>());
+                    newResultList.add(new JSONObject(16));
                 }
 
                 /*4.如果列是查询系统配置的,则返回*/
@@ -228,7 +228,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 for (int i = 0; i < lastResult.size(); i++) {
                     Object o = ((JSONObject) lastResult.get(i)).get(lastFieldInfo.getFieldName());
                     if (newResultList.size() <= i) {
-                        newResultList.add(new HashMap<>(16));
+                        newResultList.add(new JSONObject(16));
                     }
                     JSONObject stringObjectMap = (JSONObject) newResultList.get(i);
                     stringObjectMap.put(finalName, o);

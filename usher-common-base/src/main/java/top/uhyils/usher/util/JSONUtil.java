@@ -38,6 +38,9 @@ public final class JSONUtil {
         for (int i = 0; i < split.length; i++) {
             String s = split[i];
             s = StringUtil.toCamelCase(s);
+            if (item == null) {
+                return null;
+            }
             if (item instanceof JSONObject) {
                 item = ((JSONObject) item).get(s);
             } else if (item instanceof JSONArray) {

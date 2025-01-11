@@ -10,7 +10,7 @@
     <!-- 获取yml中的log地址 -->
     <springProperty scope="context" name="log.path" source="log-out.path" defaultValue="D:/usher/logs"/>
     <springProperty scope="context" name="log.dir.name" source="log-out.dir-name" defaultValue="defaultDir"/>
-    <springProperty scope="context" name="log.level" source="log-out.level" defaultValue="info"/>
+    <springProperty scope="context" name="log.level" source="log-out.level" defaultValue="DEBUG"/>
 
     <!--0. 日志格式和颜色渲染 -->
     <!-- 彩色日志依赖的渲染类 -->

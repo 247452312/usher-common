@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.io.HexDump;
 import top.uhyils.usher.annotation.NotNull;
@@ -485,7 +486,15 @@ public final class MysqlUtil {
      * @return
      */
     @NotNull
-    public static boolean likeMatching(String key, String variableName) {
+    public static boolean likeMatching(String key, List<Object> variableName) {
+        for (Object o : variableName) {
+            if (o instanceof String) {
+                boolean equals = Objects.equals(key, o);
+                if (equals) {
+                    return true;
+                }
+            }
+        }
         // todo 匹配like
         return false;
     }

@@ -481,4 +481,12 @@ public final class StringUtil {
     public static boolean isDigit(String str) {
         return PATTERN.matcher(str).matches();
     }
+
+    public static String trimTarget(String source, String target) {
+        if (source.startsWith(target) && source.endsWith(target) && source.length() > 1) {
+            source = source.substring(1, source.length() - 1);
+            return trimTarget(source, target);
+        }
+        return source;
+    }
 }

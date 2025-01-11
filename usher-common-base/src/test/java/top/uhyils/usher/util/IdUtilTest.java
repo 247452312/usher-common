@@ -44,6 +44,13 @@ public class IdUtilTest {
 
     }
 
+    @Test
+    public void newId2() {
+        long e = IdUtil.newId();
+        System.out.println(e);
+
+    }
+
     private static class LogDealThreadFactory implements ThreadFactory {
 
         private static final AtomicInteger atomicInteger = new AtomicInteger(0);

@@ -134,7 +134,10 @@ class MysqlCommandTest {
 
     @Test
     void invoke() {
-        CallNode callNode = new SqlCallNode("select * from user a left join role b on a.id = b.user_id", handler);
+        CallNode callNode = new SqlCallNode("select * from user a left join role b on a.id = b.user_id", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         NodeInvokeResult call = callNode.call(null);
         int i = 1;
     }
@@ -142,7 +145,10 @@ class MysqlCommandTest {
 
     @Test
     void invoke2() {
-        CallNode callNode = new SqlCallNode("select * from user a left join role b on a.id = b.user_id where id = #{id}", handler);
+        CallNode callNode = new SqlCallNode("select * from user a left join role b on a.id = b.user_id where id = #{id}", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         JSONObject params = new JSONObject();
         params.put("id", 1);
         NodeInvokeResult call = callNode.call(params);
@@ -151,7 +157,10 @@ class MysqlCommandTest {
 
     @Test
     void invoke3() {
-        CallNode callNode = new SqlCallNode("select * from user a left join (select * from rule where c_k = #{ck}) b on a.id = b.user_id where id = #{id}", handler);
+        CallNode callNode = new SqlCallNode("select * from user a left join (select * from rule where c_k = #{ck}) b on a.id = b.user_id where id = #{id}", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         JSONObject params = new JSONObject();
         params.put("id", 1);
         params.put("ck", 889);
@@ -161,7 +170,10 @@ class MysqlCommandTest {
 
     @Test
     void invoke4() {
-        CallNode callNode = new SqlCallNode("select a.id,b.k,concat(a.id,b.k) from user a left join (select * from rule where c_k = #{ck}) b on a.id = b.user_id where id = #{id}", handler);
+        CallNode callNode = new SqlCallNode("select a.id,b.k,concat(a.id,b.k) from user a left join (select * from rule where c_k = #{ck}) b on a.id = b.user_id where id = #{id}", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         JSONObject params = new JSONObject();
         params.put("id", 1);
         params.put("ck", 889);
@@ -171,7 +183,10 @@ class MysqlCommandTest {
 
     @Test
     void invoke5() {
-        CallNode callNode = new SqlCallNode("select a.id,b.k,concat(a.id,b.k),(select r2 from uu2 where r2 = a.id) as r2 from user a left join (select * from rule where c_k = #{ck}) b on a.id = b.user_id where id = #{id}", handler);
+        CallNode callNode = new SqlCallNode("select a.id,b.k,concat(a.id,b.k),(select r2 from uu2 where r2 = a.id) as r2 from user a left join (select * from rule where c_k = #{ck}) b on a.id = b.user_id where id = #{id}", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         JSONObject params = new JSONObject();
         params.put("id", 1);
         params.put("ck", 889);
@@ -181,7 +196,10 @@ class MysqlCommandTest {
 
     @Test
     void invokeUpdate1() {
-        CallNode callNode = new SqlCallNode("update user set name = 'abc' where id = 19", handler);
+        CallNode callNode = new SqlCallNode("update user set name = 'abc' where id = 19", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         JSONObject params = new JSONObject();
         NodeInvokeResult call = callNode.call(params);
         int i = 1;
@@ -189,7 +207,10 @@ class MysqlCommandTest {
 
     @Test
     void invokeInsert1() {
-        CallNode callNode = new SqlCallNode("insert into user value(1,'name')", handler);
+        CallNode callNode = new SqlCallNode("insert into user value(1,'name')", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         JSONObject params = new JSONObject();
         NodeInvokeResult call = callNode.call(params);
         int i = 1;
@@ -197,7 +218,10 @@ class MysqlCommandTest {
 
     @Test
     void invokeInsert2() {
-        CallNode callNode = new SqlCallNode("insert into user(id,name) value(1,'name')", handler);
+        CallNode callNode = new SqlCallNode("insert into user(id,name) value(1,'name')", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         JSONObject params = new JSONObject();
         NodeInvokeResult call = callNode.call(params);
         int i = 1;
@@ -205,7 +229,10 @@ class MysqlCommandTest {
 
     @Test
     void invokeDel1() {
-        CallNode callNode = new SqlCallNode("delete from user where id = 1", handler);
+        CallNode callNode = new SqlCallNode("delete from user where id = 1", mysqlInvokeCommand -> {
+            CallNode tempNode = handler.makeNode(mysqlInvokeCommand);
+            return tempNode.call(mysqlInvokeCommand.getHeader(), mysqlInvokeCommand.getParams());
+        });
         JSONObject params = new JSONObject();
         NodeInvokeResult call = callNode.call(params);
         int i = 1;

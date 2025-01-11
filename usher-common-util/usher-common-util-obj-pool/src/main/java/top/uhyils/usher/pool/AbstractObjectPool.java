@@ -3,7 +3,6 @@ package top.uhyils.usher.pool;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
-import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,31 +104,15 @@ public abstract class AbstractObjectPool<T> implements ObjectPool<T> {
      */
     private void transReference() {
         Reference<? extends T> poll;
-        try {
-            while ((poll = referenceQueue.poll()) != null) {
-                T t = getBeGcObj(poll);
-                // 清空obj
-                emptyObj(t);
-                queue.add(t);
+        while ((poll = referenceQueue.poll()) != null) {
+            T t = poll.get();
+            if (t == null) {
+                continue;
             }
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            LogUtil.error(this, e);
+            // 清空obj
+            emptyObj(t);
+            queue.add(t);
         }
     }
 
-    /**
-     * 获取被gc的数据
-     *
-     * @param poll
-     *
-     * @return
-     *
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     */
-    private T getBeGcObj(Reference<? extends T> poll) throws NoSuchFieldException, IllegalAccessException {
-        Field referent = Reference.class.getDeclaredField(REFERENT_FIELD_NAME);
-        referent.setAccessible(true);
-        return (T) referent.get(poll);
-    }
 }

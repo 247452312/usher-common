@@ -38,6 +38,11 @@ public class UsherSqlListExpr extends SQLExprImpl implements MySqlExpr {
         return values.hashCode();
     }
 
+    @Override
+    public SQLExpr clone() {
+        return new UsherSqlListExpr(values);
+    }
+
     public List<SQLExpr> getValues() {
         return values;
     }

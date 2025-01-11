@@ -11,9 +11,7 @@ import java.util.Objects;
 import top.uhyils.usher.annotation.NotNull;
 import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.content.CallerUserInfo;
-import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.pojo.DTO.ExprParseResultInfo;
-import top.uhyils.usher.mysql.pojo.entity.MysqlTcpLink;
 import top.uhyils.usher.mysql.util.MysqlUtil;
 import top.uhyils.usher.pojo.DTO.UserDTO;
 import top.uhyils.usher.pojo.FieldInfo;
@@ -178,8 +176,8 @@ public enum MysqlMethodEnum {
         return maps;
     }),
     USER("user", 0, String.class, false, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
-        MysqlTcpLink value = MysqlContent.MYSQL_TCP_INFO.get();
-        UserDTO userDTO = value.findUserDTO();
+        CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
+        UserDTO userDTO = callerUserInfo.getUserDTO();
 
         List<Map<String, Object>> maps = new ArrayList<>();
         Map<String, Object> item = new HashMap<>();

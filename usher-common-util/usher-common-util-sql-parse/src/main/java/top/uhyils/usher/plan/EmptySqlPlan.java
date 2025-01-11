@@ -3,6 +3,7 @@ package top.uhyils.usher.plan;
 
 import com.alibaba.fastjson.JSONArray;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import top.uhyils.usher.pojo.NodeInvokeResult;
 
@@ -15,7 +16,7 @@ import top.uhyils.usher.pojo.NodeInvokeResult;
 public class EmptySqlPlan extends AbstractSqlSqlPlan {
 
     public EmptySqlPlan(Map<String, String> headers) {
-        super(null, headers, null);
+        super(null, headers, new HashMap<>());
     }
 
     @Override

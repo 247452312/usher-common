@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jetbrains.annotations.Nullable;
+import top.uhyils.usher.content.CallNodeContent;
+import top.uhyils.usher.content.CallerUserInfo;
+import top.uhyils.usher.content.ParserContent;
 import top.uhyils.usher.context.LoginInfoHelper;
 import top.uhyils.usher.exception.AssertException;
 import top.uhyils.usher.handler.NodeHandler;
@@ -20,6 +23,9 @@ import top.uhyils.usher.mysql.decode.MysqlDecoder;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.enums.MysqlHandlerStatusEnum;
 import top.uhyils.usher.mysql.handler.MysqlServiceHandler;
+import top.uhyils.usher.mysql.plan.parser.SetSqlParser;
+import top.uhyils.usher.mysql.plan.parser.ShowSqlParser;
+import top.uhyils.usher.mysql.plan.parser.UseSqlParser;
 import top.uhyils.usher.mysql.pojo.cqe.MysqlCommand;
 import top.uhyils.usher.mysql.pojo.cqe.impl.ComBinlogDumpCommand;
 import top.uhyils.usher.mysql.pojo.cqe.impl.ComChangeUserCommand;
@@ -67,8 +73,11 @@ import top.uhyils.usher.util.LogUtil;
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2022年03月22日 19时19分
  */
-public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements ChannelInboundHandler {
+public class MysqlInfoNettyHandler extends ChannelInboundHandlerAdapter implements ChannelInboundHandler {
 
+    static {
+        ParserContent.addParser(new SetSqlParser(), new ShowSqlParser(), new UseSqlParser());
+    }
 
     /**
      * 单纯sql 服务处理器
@@ -80,13 +89,12 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
      */
     private final MysqlServiceHandler mysqlServiceHandler;
 
-
     /**
      * 连接
      */
     private Channel mysqlChannel;
 
-    public MysqlInfoHandler(NodeHandler handler, MysqlServiceHandler mysqlServiceHandler) {
+    public MysqlInfoNettyHandler(NodeHandler handler, MysqlServiceHandler mysqlServiceHandler) {
         this.handler = handler;
         this.mysqlServiceHandler = mysqlServiceHandler;
     }
@@ -111,7 +119,9 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
 
         MysqlTcpLink value = MysqlTcpLink.build(mysqlChannel.id(), inetSocketAddress);
         value.addToLocalCache();
-
+        CallerUserInfo userInfo = new CallerUserInfo();
+        userInfo.setDatabaseName(CallNodeContent.DEFAULT_RESULT_NAME);
+        CallNodeContent.CALLER_INFO.set(userInfo);
         LogUtil.info("mysql 连接! ip:{}", inetSocketAddress.toString());
         AuthResponse authResponse = AuthResponse.build();
         List<byte[]> msgs = authResponse.toByte();
@@ -193,6 +203,7 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
 
     @Nullable
     private MysqlCommand findCommandByStatus(MysqlTcpLink mysqlTcpLink, byte[] mysqlBytes) {
+        CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
         MysqlHandlerStatusEnum status = mysqlTcpLink.status();
         MysqlCommand mysqlCommand = null;
         switch (status) {
@@ -202,7 +213,7 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
                 break;
             case PASSED:
                 // 其他状态,正确接收请求
-                LoginInfoHelper.setUser(mysqlTcpLink.findUserDTO());
+                LoginInfoHelper.setUser(callerUserInfo.getUserDTO());
                 LoginInfoHelper.setIp(mysqlTcpLink.findLocalAddress().getAddress().getHostAddress());
                 mysqlCommand = parseForCommand(mysqlBytes);
                 break;
@@ -278,7 +289,7 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
             /*这里是需要发送往后台进行处理的请求类型*/
             case COM_QUERY:
                 // sql查询请求
-                return new ComQueryCommand(mysqlBytes, handler);
+                return new ComQueryCommand(mysqlBytes, handler, mysqlServiceHandler);
             case COM_FIELD_LIST:
                 // 字段获取请求
                 return new ComFieldListCommand(mysqlBytes);
@@ -289,7 +300,7 @@ public class MysqlInfoHandler extends ChannelInboundHandlerAdapter implements Ch
 
             case COM_STMT_EXECUTE:
                 // 执行预处理语句
-                return new ComStmtExecuteCommand(mysqlBytes, handler);
+                return new ComStmtExecuteCommand(mysqlBytes, handler, mysqlServiceHandler);
 
 
             /*以下是不需要发送往服务器进行处理的请求类型*/

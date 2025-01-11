@@ -168,7 +168,7 @@ public abstract class AbstractSqlParser implements SqlParser {
                 case RIGHT_OUTER_JOIN:
                     return pool.getOrCreateObject(rights, lefts, condition, JoinType.LEFT_OUTER_JOIN);
                 default:
-                    Asserts.throwException("sql连表条件不支持:{}", joinType.name_lcase);
+                    Asserts.throwException("sql连表条件不支持:{}", joinType.nameLCase);
                     return null;
             }
 

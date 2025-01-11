@@ -1,8 +1,8 @@
 package top.uhyils.usher.mysql.pojo.cqe;
 
+import top.uhyils.usher.content.CallNodeContent;
+import top.uhyils.usher.content.CallerUserInfo;
 import top.uhyils.usher.context.LoginInfoHelper;
-import top.uhyils.usher.mysql.content.MysqlContent;
-import top.uhyils.usher.mysql.pojo.entity.MysqlTcpLink;
 import top.uhyils.usher.pojo.DTO.UserDTO;
 import top.uhyils.usher.pojo.cqe.command.base.AbstractCommand;
 
@@ -19,8 +19,8 @@ public abstract class AbstractMysqlCommand extends AbstractCommand implements My
     protected byte[] mysqlBytes;
 
     protected AbstractMysqlCommand(byte[] mysqlBytes) {
-        MysqlTcpLink mysqlTcpLink = MysqlContent.MYSQL_TCP_INFO.get();
-        UserDTO userInfo = mysqlTcpLink.findUserDTO();
+        CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
+        UserDTO userInfo = callerUserInfo.getUserDTO();
         if (userInfo != null) {
             String token = userInfo.findToken();
             LoginInfoHelper.setToken(token);

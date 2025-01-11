@@ -1,5 +1,6 @@
 package top.uhyils.usher.log.filter.db;
 
+import com.alibaba.druid.DbType;
 import com.alibaba.druid.filter.FilterChain;
 import com.alibaba.druid.filter.FilterEventAdapter;
 import com.alibaba.druid.proxy.jdbc.JdbcParameter;
@@ -100,7 +101,7 @@ public class DbLogFilter extends FilterEventAdapter {
                                ? jdbcParam.getValue()
                                : null);
         }
-        return SQLUtils.format(sql, "mysql", parameters, this.statementSqlFormatOption);
+        return SQLUtils.format(sql, DbType.mysql, parameters, this.statementSqlFormatOption);
     }
 
 }

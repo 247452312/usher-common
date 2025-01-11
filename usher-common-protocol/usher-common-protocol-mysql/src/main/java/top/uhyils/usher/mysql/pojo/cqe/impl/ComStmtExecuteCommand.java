@@ -7,6 +7,7 @@ import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.enums.FieldTypeToByteEnum;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.enums.PrepareMarkEnum;
+import top.uhyils.usher.mysql.handler.MysqlServiceHandler;
 import top.uhyils.usher.mysql.pojo.DTO.PrepareInfo;
 import top.uhyils.usher.mysql.pojo.DTO.PrepareParamInfo;
 import top.uhyils.usher.mysql.pojo.response.MysqlResponse;
@@ -22,6 +23,8 @@ import top.uhyils.usher.mysql.util.Proto;
 public class ComStmtExecuteCommand extends MysqlSqlCommand {
 
     private final NodeHandler handler;
+
+    private final MysqlServiceHandler serviceHandler;
 
     /**
      * 预处理语句
@@ -43,14 +46,15 @@ public class ComStmtExecuteCommand extends MysqlSqlCommand {
      */
     private PrepareMarkEnum parse;
 
-    public ComStmtExecuteCommand(byte[] mysqlBytes, NodeHandler handler) {
+    public ComStmtExecuteCommand(byte[] mysqlBytes, NodeHandler handler, MysqlServiceHandler serviceHandler) {
         super(mysqlBytes);
         this.handler = handler;
+        this.serviceHandler = serviceHandler;
     }
 
     @Override
     public List<MysqlResponse> invoke() throws Exception {
-        ComQueryCommand comQueryRequest = new ComQueryCommand(mysqlBytes, sql, handler);
+        ComQueryCommand comQueryRequest = new ComQueryCommand(mysqlBytes, sql, handler, serviceHandler);
         return comQueryRequest.invoke();
     }
 

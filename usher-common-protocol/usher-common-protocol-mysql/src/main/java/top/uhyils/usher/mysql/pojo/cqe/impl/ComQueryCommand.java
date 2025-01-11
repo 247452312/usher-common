@@ -3,19 +3,22 @@ package top.uhyils.usher.mysql.pojo.cqe.impl;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.exception.AssertException;
 import top.uhyils.usher.handler.NodeHandler;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
 import top.uhyils.usher.mysql.enums.SqlTypeEnum;
+import top.uhyils.usher.mysql.handler.MysqlServiceHandler;
 import top.uhyils.usher.mysql.pojo.response.MysqlResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.ErrResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.OkResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.ResultSetResponse;
+import top.uhyils.usher.mysql.pojo.sys.SysProviderInterface;
 import top.uhyils.usher.mysql.util.Proto;
 import top.uhyils.usher.node.call.CallNode;
-import top.uhyils.usher.plan.PlanInvoker;
 import top.uhyils.usher.plan.SqlPlan;
 import top.uhyils.usher.pojo.NodeInvokeResult;
 import top.uhyils.usher.util.CollectionUtil;
@@ -33,16 +36,19 @@ public class ComQueryCommand extends MysqlSqlCommand {
 
     private final NodeHandler handler;
 
+    private final MysqlServiceHandler mysqlServiceHandler;
+
     private String completeSql;
 
-    public ComQueryCommand(byte[] mysqlBytes, String sql, NodeHandler handler) {
-        this(mysqlBytes, handler);
+    public ComQueryCommand(byte[] mysqlBytes, String sql, NodeHandler handler, MysqlServiceHandler mysqlServiceHandler) {
+        this(mysqlBytes, handler, mysqlServiceHandler);
         this.completeSql = sql;
     }
 
-    public ComQueryCommand(byte[] mysqlBytes, NodeHandler handler) {
+    public ComQueryCommand(byte[] mysqlBytes, NodeHandler handler, MysqlServiceHandler mysqlServiceHandler) {
         super(mysqlBytes);
         this.handler = handler;
+        this.mysqlServiceHandler = mysqlServiceHandler;
     }
 
     @Override
@@ -79,6 +85,7 @@ public class ComQueryCommand extends MysqlSqlCommand {
      * @param result
      */
     private void invokeSql(String sql, List<MysqlResponse> result) {
+
         // 解析sql为执行计划
         List<SqlPlan> sqlPlans = PlanUtil.analysisSqlToPlan(sql);
         // 执行计划为空, 返回执行成功,无信息
@@ -89,9 +96,16 @@ public class ComQueryCommand extends MysqlSqlCommand {
 
         NodeInvokeResult execute;
         try {
-            execute = PlanInvoker.execute(sql, mysqlInvokeCommand -> {
-                CallNode callNode = handler.makeNode(mysqlInvokeCommand);
-                return callNode.call(new JSONObject());
+            execute = PlanUtil.execute(sqlPlans, new HashMap<>(), new JSONObject(), command -> {
+                boolean isSysTable = CallNodeContent.SYS_DATABASE.contains(command.getDatabase());
+                if (isSysTable) {
+                    // 系统表
+                    SysProviderInterface providerInterface = new SysProviderInterface(command.getDatabase(), command.getTable(), mysqlServiceHandler);
+                    return providerInterface.getResult(command.getHeader(), command.getParams());
+                } else {
+                    CallNode callNode = handler.makeNode(command);
+                    return callNode.call(command.getHeader(), command.getParams());
+                }
             });
         } catch (AssertException e) {
             LogUtil.error(this, e, "sql:" + sql + "\n");

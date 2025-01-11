@@ -85,4 +85,8 @@ public class PlanFactory {
     public static SqlPlan buildUpdateSql(SqlTableSourceBinaryTreeInfo froms, Map<String, String> itemMap, Map<String, String> headers, Map<String, Object> params) {
         return new UpdateSqlPlanImpl(froms, itemMap, headers, params);
     }
+
+    public static SqlPlan buildUsePlan(String simpleName, Map<String, String> headers) {
+        return null;
+    }
 }
