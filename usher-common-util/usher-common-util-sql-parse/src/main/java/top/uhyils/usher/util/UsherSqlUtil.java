@@ -5,7 +5,6 @@ import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNumericLiteralExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -72,7 +71,7 @@ public final class UsherSqlUtil {
                 if (!first.isPresent()) {
                     return ExprParseResultInfo.buildConstant((T) defaultValue);
                 } else {
-                    JSONArray result = nodeInvokeResult.getResult();
+                    List<Map<String, Object>> result = nodeInvokeResult.getResult();
                     List<T> collect = result.stream().map(t -> (T) ((JSONObject) t).get(finalFieldName)).collect(Collectors.toList());
                     return ExprParseResultInfo.buildListConstant(collect);
                 }
@@ -81,8 +80,8 @@ public final class UsherSqlUtil {
                 Asserts.assertTrue(nodeInvokeResult != null, "未找到临时变量对应的执行计划");
                 Asserts.assertTrue(nodeInvokeResult.getFieldInfos().size() == 1, "方法入参不能是多列");
                 FieldInfo fieldInfo = nodeInvokeResult.getFieldInfos().get(0);
-                JSONArray result = nodeInvokeResult.getResult();
-                List<T> collect = result.stream().map(t -> (T) ((JSONObject) t).get(fieldInfo.getFieldName())).collect(Collectors.toList());
+                List<Map<String, Object>> result = nodeInvokeResult.getResult();
+                List<T> collect = result.stream().map(t -> (T) t.get(fieldInfo.getFieldName())).collect(Collectors.toList());
                 return ExprParseResultInfo.buildListConstant(collect);
 
             }
@@ -94,7 +93,7 @@ public final class UsherSqlUtil {
             return ExprParseResultInfo.buildConstant((T) value);
         } else if (arg instanceof SQLIdentifierExpr) {
             String name = ((SQLIdentifierExpr) arg).getName();
-            List<T> collect = parentInvokeResult.getResult().stream().map(t -> (T) ((JSONObject) t).get(name)).collect(Collectors.toList());
+            List<T> collect = parentInvokeResult.getResult().stream().map(t -> (T) t.get(name)).collect(Collectors.toList());
             return ExprParseResultInfo.buildListConstant(collect);
         } else if (arg instanceof SQLPropertyExpr) {
             // 出现情况 sql参数中带有concat(a.id,b.uu) 这种情况解析a.id时会命中这里

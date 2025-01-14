@@ -2,9 +2,11 @@ package top.uhyils.usher.mysql.plan.parser;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUseStatement;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import top.uhyils.usher.mysql.pojo.plan.impl.UseSqlPlanImpl;
 import top.uhyils.usher.plan.SqlPlan;
 import top.uhyils.usher.plan.parser.SqlParser;
 import top.uhyils.usher.util.SqlStringUtil;
@@ -31,7 +33,6 @@ public class UseSqlParser implements SqlParser {
         SQLUseStatement sqlUseStatement = (SQLUseStatement) sql;
         String simpleName = sqlUseStatement.getDatabase().getSimpleName();
         simpleName = SqlStringUtil.cleanQuotation(simpleName);
-        //        return Arrays.asList(PlanFactory.buildUsePlan(simpleName, headers));
-        return Collections.emptyList();
+        return Arrays.asList(new UseSqlPlanImpl(simpleName, headers, new HashMap<>()));
     }
 }

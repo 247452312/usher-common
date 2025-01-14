@@ -122,10 +122,10 @@ public abstract class AbstractSqlSqlPlan implements SqlSqlPlan {
                 PlaceholderInfo placeholder = (PlaceholderInfo) v;
                 NodeInvokeResult nodeInvokeResult = planArgs.get(placeholder.getId());
                 Asserts.assertTrue(nodeInvokeResult != null, "占位符对应的参数不存在");
-                JSONArray maps = nodeInvokeResult.getResult();
+                List<Map<String, Object>> maps = nodeInvokeResult.getResult();
 
                 String name = placeholder.getName();
-                List<Object> collect = maps.stream().map(t -> ((JSONObject) t).get(name)).filter(Objects::nonNull).collect(Collectors.toList());
+                List<Object> collect = maps.stream().map(t -> t.get(name)).filter(Objects::nonNull).collect(Collectors.toList());
                 if (collect.size() == 1) {
                     Object o = collect.get(0);
                     params.put(k, o);
@@ -145,16 +145,16 @@ public abstract class AbstractSqlSqlPlan implements SqlSqlPlan {
      */
     protected NodeInvokeResult tileResultJson(NodeInvokeResult nodeInvokeResult) {
         List<FieldInfo> fieldInfos = nodeInvokeResult.getFieldInfos();
-        JSONArray result = nodeInvokeResult.getResult();
+        List<Map<String, Object>> result = nodeInvokeResult.getResult();
         if (CollectionUtil.isEmpty(fieldInfos) || CollectionUtil.isEmpty(result)) {
             return nodeInvokeResult;
         }
         boolean change = false;
         Map<String, FieldInfo> fieldInfoMap = fieldInfos.stream().collect(Collectors.toMap(FieldInfo::getFieldName, t -> t));
-        JSONArray newResult = new JSONArray();
+        List<Map<String, Object>> newResult = new ArrayList<>();
         // 遍历行
-        for (Object resultItem : result) {
-            JSONObject resultItemJson = (JSONObject) resultItem;
+        for (int i = 0; i < result.size(); i++) {
+            Map<String, Object> resultItemJson = result.get(i);
 
             JSONObject newLine = new JSONObject();
             List<Map<String, Object>> newResultTemp = new ArrayList<>();

@@ -1,7 +1,6 @@
 package top.uhyils.usher.enums;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,7 @@ public enum SqlMethodEnum {
             // todo 这里需要添加 sql语句中有group的情况
             int size = parentInvokeResult.getResult().size();
 
-            JSONArray maps = new JSONArray();
+            List<Map<String, Object>> maps = new ArrayList<>();
             JSONObject e = new JSONObject();
             e.put(fieldName, size);
             maps.add(e);
@@ -47,9 +46,9 @@ public enum SqlMethodEnum {
             return null;
         } else {
             // count中为字段名称
-            JSONArray result = parentInvokeResult.getResult();
-            long size = result.stream().filter(t -> ((JSONObject) t).containsKey(fieldName) && ((JSONObject) t).get(fieldName) != null).count();
-            JSONArray maps = new JSONArray();
+            List<Map<String, Object>> result = parentInvokeResult.getResult();
+            long size = result.stream().filter(t -> t.containsKey(fieldName) && t.get(fieldName) != null).count();
+            List<Map<String, Object>> maps = new ArrayList<>();
             JSONObject e = new JSONObject();
             e.put(fieldName, size);
             maps.add(e);
@@ -76,7 +75,7 @@ public enum SqlMethodEnum {
             }
         }
 
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (StringBuilder stringBuilder : argList) {
             String string = stringBuilder.toString();
             JSONObject item = new JSONObject();
@@ -95,7 +94,7 @@ public enum SqlMethodEnum {
         ExprParseResultInfo<String> leftStr = UsherSqlUtil.parse(arguments.get(0), lastAllPlanResult, parentInvokeResult);
         ExprParseResultInfo<Number> rightNumber = UsherSqlUtil.parse(arguments.get(1), lastAllPlanResult, parentInvokeResult);
 
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         // 如果两边都是常量,size为1 否则 哪边是列表size是哪边 如果两边都是,则使用左边字符串为准
         long size = !leftStr.isConstant() ? leftStr.getListResult().size() : (!rightNumber.isConstant() ? rightNumber.getListResult().size() : 1);
         for (int i = 0; i < size; i++) {
@@ -117,7 +116,7 @@ public enum SqlMethodEnum {
         // 如果两边都是常量,size为1 否则 哪边是列表size是哪边 如果两边都是,则使用左边字符串为准
         long size = !leftStr.isConstant() ? leftStr.getListResult().size() : (!rightStr.isConstant() ? rightStr.getListResult().size() : 1);
 
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             String ls = leftStr.isConstant() ? leftStr.get() : leftStr.get(i);
             String rs = rightStr.isConstant() ? rightStr.get() : rightStr.get(i);
@@ -140,10 +139,10 @@ public enum SqlMethodEnum {
             return null;
         } else {
             // count中为字段名称
-            JSONArray result = parentInvokeResult.getResult();
-            long sum = result.stream().filter(t -> ((JSONObject) t).containsKey(fieldName) && ((JSONObject) t).get(fieldName) != null).mapToLong(t -> (long) ((JSONObject) t).get(fieldName)).sum();
+            List<Map<String, Object>> result = parentInvokeResult.getResult();
+            long sum = result.stream().filter(t -> t.containsKey(fieldName) && t.get(fieldName) != null).mapToLong(t -> (long) t.get(fieldName)).sum();
 
-            JSONArray maps = new JSONArray();
+            List<Map<String, Object>> maps = new ArrayList<>();
             JSONObject item = new JSONObject();
             item.put(fieldName, sum);
             maps.add(item);
@@ -152,7 +151,7 @@ public enum SqlMethodEnum {
     }),
     VERSION("version", 0, String.class, false, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
 
-        JSONArray maps = new JSONArray();
+        List<Map<String, Object>> maps = new ArrayList<>();
         JSONObject item = new JSONObject();
         item.put(fieldName, CallNodeContent.VERSION);
         maps.add(item);
@@ -161,7 +160,7 @@ public enum SqlMethodEnum {
     DATABASE("database", 0, String.class, false, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
         CallerUserInfo value = CallNodeContent.CALLER_INFO.get();
 
-        JSONArray maps = new JSONArray();
+        List<Map<String, Object>> maps = new ArrayList<>();
         JSONObject item = new JSONObject();
         item.put(fieldName, value.getDatabaseName());
         maps.add(item);
@@ -170,7 +169,7 @@ public enum SqlMethodEnum {
     SCHEMA("schema", 0, String.class, false, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
         CallerUserInfo value = CallNodeContent.CALLER_INFO.get();
 
-        JSONArray maps = new JSONArray();
+        List<Map<String, Object>> maps = new ArrayList<>();
         JSONObject item = new JSONObject();
         item.put(fieldName, value.getDatabaseName());
         maps.add(item);
@@ -180,7 +179,7 @@ public enum SqlMethodEnum {
         CallerUserInfo value = CallNodeContent.CALLER_INFO.get();
         UserDTO userDTO = value.getUserDTO();
 
-        JSONArray maps = new JSONArray();
+        List<Map<String, Object>> maps = new ArrayList<>();
         JSONObject item = new JSONObject();
         item.put(fieldName, userDTO.getUsername() + "@" + userDTO.getIp());
         maps.add(item);
@@ -188,7 +187,7 @@ public enum SqlMethodEnum {
     }),
     LOWER("lower", 1, String.class, false, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
         SQLExpr argName = arguments.get(0);
-        JSONArray maps = new JSONArray();
+        List<Map<String, Object>> maps = new ArrayList<>();
         for (Object objectMap : parentInvokeResult.getResult()) {
             JSONObject object = (JSONObject) objectMap;
             JSONObject item = new JSONObject();
@@ -198,9 +197,9 @@ public enum SqlMethodEnum {
         return maps;
     }),
     GROUP_CONCAT("group_concat", 1, String.class, true, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
-        JSONArray parentResult = parentInvokeResult.getResult();
+        List<Map<String, Object>> parentResult = parentInvokeResult.getResult();
 
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder();
         // 遍历每一行
@@ -311,7 +310,7 @@ public enum SqlMethodEnum {
      *
      * @return
      */
-    public JSONArray makeResult(Map<Long, NodeInvokeResult> lastAllPlanResult, NodeInvokeResult parentInvokeResult, List<SQLExpr> arguments, String fieldName) {
+    public List<Map<String, Object>> makeResult(Map<Long, NodeInvokeResult> lastAllPlanResult, NodeInvokeResult parentInvokeResult, List<SQLExpr> arguments, String fieldName) {
         return function.makeResult(lastAllPlanResult, parentInvokeResult, arguments, fieldName);
     }
 
@@ -327,6 +326,6 @@ public enum SqlMethodEnum {
          *
          * @return
          */
-        JSONArray makeResult(Map<Long, NodeInvokeResult> lastAllPlanResult, NodeInvokeResult parentInvokeResult, List<SQLExpr> arguments, String fieldName);
+        List<Map<String, Object>> makeResult(Map<Long, NodeInvokeResult> lastAllPlanResult, NodeInvokeResult parentInvokeResult, List<SQLExpr> arguments, String fieldName);
     }
 }

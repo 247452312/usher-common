@@ -1,6 +1,5 @@
 package top.uhyils.usher.mysql.pojo.sys;
 
-import com.alibaba.fastjson.JSONArray;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ public class IRoutines extends AbstractSysTable {
             throw Asserts.makeException("未登录");
         }
 
-        JSONArray newResults = new JSONArray();
+        List<Map<String, Object>> newResults = new ArrayList<>();
 
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(null);
         nodeInvokeResult.setResult(newResults);

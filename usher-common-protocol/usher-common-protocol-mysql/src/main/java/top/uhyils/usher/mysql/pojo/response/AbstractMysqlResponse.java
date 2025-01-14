@@ -24,8 +24,9 @@ public abstract class AbstractMysqlResponse implements MysqlResponse {
         List<byte[]> result = new ArrayList<>(bytes.size());
         for (byte[] aByte : bytes) {
             List<byte[]> aByteList = new ArrayList<>();
-            aByteList.add(MysqlUtil.toBytes(aByte.length + (b ? 1 : 0), 1));
-            aByteList.add(new byte[2]);
+            byte[] lengthBytes = MysqlUtil.toBytes(aByte.length + (b ? 1 : 0));
+            aByteList.add(lengthBytes);
+            aByteList.add(new byte[3 - lengthBytes.length]);
             long realResponseIndex = mysqlTcpLink.index() + 1;
             aByteList.add(new byte[]{(byte) realResponseIndex});
             if (b) {

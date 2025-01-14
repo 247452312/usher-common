@@ -43,7 +43,7 @@ public class IUserPrivileges extends AbstractSysTable {
         fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "PRIVILEGE_TYPE", "PRIVILEGE_TYPE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
         fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "IS_GRANTABLE", "IS_GRANTABLE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
         JSONArray objects = JSON.parseArray(JSON.toJSONString(userInfos));
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (int i = 0; i < objects.size(); i++) {
             JSONObject jsonObject = objects.getJSONObject(i);
             result.add(jsonObject);

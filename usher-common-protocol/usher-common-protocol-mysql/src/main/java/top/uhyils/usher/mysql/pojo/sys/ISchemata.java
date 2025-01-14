@@ -1,25 +1,22 @@
 package top.uhyils.usher.mysql.pojo.sys;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.context.LoginInfoHelper;
 import top.uhyils.usher.enums.FieldTypeEnum;
 import top.uhyils.usher.mysql.handler.MysqlServiceHandler;
-import top.uhyils.usher.mysql.pojo.DTO.TableDTO;
 import top.uhyils.usher.node.DatabaseInfo;
 import top.uhyils.usher.pojo.DTO.UserDTO;
 import top.uhyils.usher.pojo.FieldInfo;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.cqe.query.BlackQuery;
+import top.uhyils.usher.ustream.UStream;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.CollectionUtil;
 import top.uhyils.usher.util.StringUtil;
@@ -41,42 +38,28 @@ public class ISchemata extends AbstractSysTable {
 
     @Override
     public NodeInvokeResult doGetResultNoParams() {
-        String schemaName = (String) params.get("table_schema");
+        List<String> schemaNames = (List<String>) params.get("table_schema");
         Optional<UserDTO> userOptional = LoginInfoHelper.get();
         if (!userOptional.isPresent()) {
             throw Asserts.makeException("未登录");
         }
-        List<TableDTO> callNodeDTOS = handler.findTableByCompanyAndDatabase(userOptional.get().getId(), schemaName);
+        List<DatabaseInfo> callNodeDTOS = handler.getAllDatabaseInfo(new BlackQuery());
 
-        JSONArray newResults = new JSONArray();
+        List<Map<String, Object>> newResults = new ArrayList<>();
 
-        Set<String> dbSet = new HashSet<>();
-        callNodeDTOS.stream().filter(t -> {
-            String database = t.getDatabase();
-            if (dbSet.contains(database)) {
-                return false;
-            } else {
-                dbSet.add(database);
-                return true;
-            }
-        }).forEach(t -> {
-            DatabaseInfo databaseInfo = new DatabaseInfo();
-            databaseInfo.setCatalogName(CallNodeContent.CATALOG_NAME);
-            databaseInfo.setSchemaName(t.getDatabase());
-            databaseInfo.setDefaultCharacterSetName(CallNodeContent.DEFAULT_CHARACTER_SET_NAME);
-            databaseInfo.setDefaultCollationName(CallNodeContent.DEFAULT_COLLATION_NAME);
-            databaseInfo.setSqlPath(null);
-            databaseInfo.setDefaultEncryption("NO");
-            newResults.add(JSONObject.parseObject(JSONObject.toJSONString(databaseInfo)));
-        });
+        UStream<DatabaseInfo> distinct = callNodeDTOS.ustream().distinct(DatabaseInfo::getSchemaName);
+        if (CollectionUtil.isNotEmpty(schemaNames)) {
+            distinct = distinct.filter(t -> schemaNames.contains(t.getSchemaName()));
+        }
+        distinct.forEach(t -> newResults.add(JSONObject.parseObject(JSONObject.toJSONString(t))));
 
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(null);
         if (CollectionUtil.isNotEmpty(newResults)) {
             List<Map<String, Object>> tempResults = new ArrayList<>();
-            JSONObject first = newResults.getJSONObject(0);
+            Map<String, Object> first = newResults.get(0);
             Map<String, String> fieldNameMap = first.keySet().stream().collect(Collectors.toMap(t -> t, t -> StringUtil.toUnderline(t).toUpperCase()));
             for (int i = 0; i < newResults.size(); i++) {
-                JSONObject newResult = newResults.getJSONObject(i);
+                Map<String, Object> newResult = newResults.get(i);
                 Map<String, Object> tempNewResultMap = new HashMap<>(newResult.size());
                 for (Entry<String, Object> newResultItem : newResult.entrySet()) {
                     String key = newResultItem.getKey();

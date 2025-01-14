@@ -3,7 +3,6 @@ package top.uhyils.usher.node.call;
 import com.alibaba.fastjson.JSONObject;
 import java.util.Map;
 import java.util.function.Function;
-import top.uhyils.usher.enums.QuerySqlTypeEnum;
 import top.uhyils.usher.pojo.CallInfo;
 import top.uhyils.usher.pojo.NodeInvokeResult;
 import top.uhyils.usher.pojo.SqlInvokeCommand;
@@ -32,9 +31,9 @@ public class SqlCallNode extends AbstractNode {
     public SqlCallNode(SqlInvokeCommand mysqlInvokeCommand, TableInfo tableInfo, Function<SqlInvokeCommand, NodeInvokeResult> handler) {
         super(mysqlInvokeCommand, tableInfo);
         CallInfo callInfo = tableInfo.getCallInfo();
-        QuerySqlTypeEnum type = mysqlInvokeCommand.getType();
-        Asserts.assertTrue(callInfo.getSupportSqlTypes().contains(type), "http根节点未设置指定调用方式:{}", type.getCode());
-        JSONObject jsonObject = callInfo.getParams().get(type);
+        Asserts.assertTrue(callInfo.getSupportSqlTypes().contains(mysqlInvokeCommand.getType()), "库:{},表:{}, 不支持{}模式", tableInfo.getDatabaseName(), tableInfo.getTableName(), mysqlInvokeCommand.getType());
+        JSONObject jsonObject = callInfo.getParams().get(mysqlInvokeCommand.getType());
+
         this.sql = jsonObject.getString(SQL_KEY);
         this.handler = handler;
     }

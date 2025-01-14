@@ -1,8 +1,8 @@
 package top.uhyils.usher.pojo;
 
-import com.alibaba.fastjson.JSONArray;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import top.uhyils.usher.plan.SqlPlan;
 
 /**
@@ -19,7 +19,7 @@ public class NodeInvokeResult implements Serializable {
     /**
      * 结果
      */
-    private JSONArray result;
+    private List<Map<String, Object>> result;
 
     /**
      * 来源执行计划
@@ -30,7 +30,7 @@ public class NodeInvokeResult implements Serializable {
         this.sourcePlan = sourcePlan;
     }
 
-    public static NodeInvokeResult build(List<FieldInfo> fieldInfos, JSONArray result, SqlPlan plan) {
+    public static NodeInvokeResult build(List<FieldInfo> fieldInfos, List<Map<String, Object>> result, SqlPlan plan) {
         NodeInvokeResult build = new NodeInvokeResult(plan);
         build.setFieldInfos(fieldInfos);
         build.setResult(result);
@@ -46,11 +46,11 @@ public class NodeInvokeResult implements Serializable {
         this.fieldInfos = fieldInfos;
     }
 
-    public JSONArray getResult() {
+    public List<Map<String, Object>> getResult() {
         return result;
     }
 
-    public void setResult(JSONArray result) {
+    public void setResult(List<Map<String, Object>> result) {
         this.result = result;
     }
 

@@ -92,7 +92,7 @@ public class MUser extends AbstractSysTable {
         fieldInfos.add(new FieldInfo("mysql", "user", "user", "USER_ATTRIBUTES", "USER_ATTRIBUTES", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
 
         JSONArray objects = JSON.parseArray(JSON.toJSONString(userInfos));
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (int i = 0; i < objects.size(); i++) {
             JSONObject jsonObject = objects.getJSONObject(i);
             result.add(jsonObject);

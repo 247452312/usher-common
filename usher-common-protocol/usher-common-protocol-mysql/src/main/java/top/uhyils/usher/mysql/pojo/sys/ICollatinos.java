@@ -1,6 +1,5 @@
 package top.uhyils.usher.mysql.pojo.sys;
 
-import com.alibaba.fastjson.JSONArray;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class ICollatinos extends AbstractSysTable {
     protected NodeInvokeResult doGetResultNoParams() {
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(null);
 
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         nodeInvokeResult.setResult(result);
         List<FieldInfo> fieldInfos = new ArrayList<>();
         fieldInfos.add(new FieldInfo("information_schema", "collatinos", "collatinos", "COLLATION_NAME", "COLLATION_NAME", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));

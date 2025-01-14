@@ -29,7 +29,7 @@ public final class HttpUtil {
      * @return JSON或者字符串
      */
     public static String sendHttpGet(String url, Map<String, String> head) {
-        return send(Method.GET, url, head, null);
+        return send(Method.GET, url, head, "");
     }
 
     /**
@@ -59,6 +59,24 @@ public final class HttpUtil {
         heads.forEach(request::header);
         if (params != null) {
             request = request.body(JSON.toJSONString(params));
+        }
+        return request.execute().body();
+    }
+
+    /**
+     * 发送请求
+     *
+     * @param url    url
+     * @param heads  请求头
+     * @param params 参数
+     *
+     * @return JSON或者字符串
+     */
+    public static String send(Method method, String url, Map<String, String> heads, String params) {
+        HttpRequest request = cn.hutool.http.HttpUtil.createRequest(method, url);
+        heads.forEach(request::header);
+        if (params != null) {
+            request = request.body(params);
         }
         return request.execute().body();
     }

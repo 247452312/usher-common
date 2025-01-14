@@ -2,7 +2,6 @@ package top.uhyils.usher.plan;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOperator;
-import com.alibaba.fastjson.JSONArray;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class BinarySqlPlanImpl extends BinarySqlPlan {
         nodeInvokeResult.setFieldInfos(fieldInfos);
 
         /*判断结果是什么*/
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         ExprParseResultInfo<Object> left = UsherSqlUtil.parse(leftExpr, lastAllPlanResult, lastNodeInvokeResult);
         ExprParseResultInfo<Object> right = UsherSqlUtil.parse(rightExpr, lastAllPlanResult, lastNodeInvokeResult);
 

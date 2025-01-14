@@ -1,10 +1,9 @@
 package top.uhyils.usher.util;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import top.uhyils.usher.enums.FieldTypeEnum;
 import top.uhyils.usher.pojo.FieldInfo;
@@ -15,11 +14,11 @@ import top.uhyils.usher.pojo.FieldInfo;
  */
 public class FieldUtil {
 
-    public static List<FieldInfo> makeFieldInfo(String dbName, String tableName, String tableRealName, int startIndex, JSONArray values) {
+    public static List<FieldInfo> makeFieldInfo(String dbName, String tableName, String tableRealName, int startIndex, List<Map<String, Object>> values) {
         if (values.isEmpty()) {
             return new ArrayList<>();
         }
-        JSONObject jsonObject = values.getJSONObject(0);
+        Map<String, Object> jsonObject = values.get(0);
         List<FieldInfo> fieldInfos = new ArrayList<>();
         for (Entry<String, Object> entry : jsonObject.entrySet()) {
             Object value = entry.getValue();
@@ -36,6 +35,8 @@ public class FieldUtil {
                 type = FieldTypeEnum.FIELD_TYPE_DOUBLE;
             } else if (value instanceof JSON) {
                 type = FieldTypeEnum.FIELD_TYPE_VARCHAR;
+            } else if (value == null) {
+                type = FieldTypeEnum.FIELD_TYPE_NULL;
             } else {
                 Asserts.throwException("未找到的字段类型:{}", value.getClass().getName());
             }

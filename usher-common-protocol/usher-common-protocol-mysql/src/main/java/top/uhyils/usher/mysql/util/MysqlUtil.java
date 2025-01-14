@@ -4,7 +4,6 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLCharExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNumericLiteralExpr;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.ByteBuf;
 import java.io.ByteArrayOutputStream;
@@ -17,14 +16,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.HexDump;
 import top.uhyils.usher.annotation.NotNull;
 import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.content.CallerUserInfo;
+import top.uhyils.usher.handler.NodeHandler;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
+import top.uhyils.usher.mysql.handler.MysqlServiceHandler;
 import top.uhyils.usher.mysql.pojo.DTO.ExprParseResultInfo;
+import top.uhyils.usher.mysql.pojo.sys.SysProviderInterface;
+import top.uhyils.usher.node.call.CallNode;
 import top.uhyils.usher.pojo.FieldInfo;
 import top.uhyils.usher.pojo.NodeInvokeResult;
+import top.uhyils.usher.pojo.SqlInvokeCommand;
+import top.uhyils.usher.pojo.entity.type.Password;
 import top.uhyils.usher.util.Asserts;
 import top.uhyils.usher.util.LogUtil;
 import top.uhyils.usher.util.SqlStringUtil;
@@ -187,7 +193,7 @@ public final class MysqlUtil {
      */
     public static byte[] mergeLengthCodedBinary(long value) {
         Asserts.assertTrue(value >= 0, "long数值不能小于零");
-        if (value <= 250) {
+        if (value < 251) {
             return new byte[]{(byte) value};
         }
         byte[] bytes = toBytes(value);
@@ -195,7 +201,7 @@ public final class MysqlUtil {
     }
 
     /**
-     * long转byte数组
+     * long转byte数组 0为最低位
      *
      * @param value
      *
@@ -204,8 +210,8 @@ public final class MysqlUtil {
     public static byte[] toBytes(long value) {
         int size = getBytesSize(value);
         byte[] result = new byte[size];
-        for (int i = size - 1; i >= 0; i--) {
-            result[i] = (byte) (value & 0x0FFL);
+        for (int i = 0; i < size; i++) {
+            result[i] = (byte) (value & 0xFF);
             value >>= 8;
         }
         return result;
@@ -228,22 +234,21 @@ public final class MysqlUtil {
         } else {
             // 长度的字节
             byte[] lengthByte = toBytes(length);
-            // 长度的字节的长度
-            int lengthByteLength = lengthByte.length;
-            // 长度字节的长度等于二
-            if (lengthByteLength == 2) {
+            if (length < 251) {
+                prefixByte = new byte[1];
+                prefixByte[0] = (byte) length;
+            } else if (length < 65535) {
                 prefixByte = new byte[3];
-                prefixByte[0] = (byte) 252;
-                System.arraycopy(lengthByte, 0, prefixByte, 1, lengthByteLength);
-            } else if (lengthByteLength == 3) {
+                prefixByte[0] = (byte) 0xfc;
+                System.arraycopy(lengthByte, 0, prefixByte, 1, 2);
+            } else if (length < 16777216) {
                 prefixByte = new byte[4];
                 prefixByte[0] = (byte) 253;
-                System.arraycopy(lengthByte, 0, prefixByte, 1, lengthByteLength);
+                System.arraycopy(lengthByte, 0, prefixByte, 1, 3);
             } else {
                 prefixByte = new byte[9];
                 prefixByte[0] = (byte) 254;
-                int offset = 8 - lengthByteLength;
-                System.arraycopy(lengthByte, 0, prefixByte, 1 + offset, lengthByteLength);
+                System.arraycopy(lengthByte, 0, prefixByte, 1, 8);
             }
         }
 
@@ -500,6 +505,21 @@ public final class MysqlUtil {
     }
 
     /**
+     * 判断密码是否正确挑战随机数
+     *
+     * @return
+     */
+    public static boolean checkSkByMysqlChallenge(String sk, byte[] seed, String challenge) {
+        // 1.1 密码解密
+        Password realPassword = new Password(sk);
+        // 1.2 密码再次加密为mysql SHA-1
+        String decodePassword = realPassword.decode();
+        byte[] bytes = MysqlUtil.encodePassword(decodePassword.getBytes(StandardCharsets.UTF_8), seed);
+        String userPassword = Base64.encodeBase64String(bytes);
+        return Objects.equals(userPassword, challenge);
+    }
+
+    /**
      * sha1加密
      *
      * @param password
@@ -570,8 +590,8 @@ public final class MysqlUtil {
             Asserts.assertTrue(nodeInvokeResult != null, "未找到临时变量对应的执行计划");
             Asserts.assertTrue(nodeInvokeResult.getFieldInfos().size() == 1, "方法入参不能是多列");
             FieldInfo fieldInfo = nodeInvokeResult.getFieldInfos().get(0);
-            JSONArray result = nodeInvokeResult.getResult();
-            List<T> collect = result.stream().map(t -> (T) ((JSONObject) t).get(fieldInfo.getFieldName())).collect(Collectors.toList());
+            List<Map<String, Object>> result = nodeInvokeResult.getResult();
+            List<T> collect = result.stream().map(t -> (T) t.get(fieldInfo.getFieldName())).collect(Collectors.toList());
             return ExprParseResultInfo.buildListConstant(collect);
         } else if (arg instanceof SQLCharExpr) {
             String text = ((SQLCharExpr) arg).getText();
@@ -586,6 +606,16 @@ public final class MysqlUtil {
         }
         Asserts.throwException("未找到解析方法入参的类型");
         return null;
+    }
+
+    public static CallNode parseCallNode(SqlInvokeCommand command, MysqlServiceHandler mysqlServiceHandler, NodeHandler handler) {
+        boolean isSysTable = CallNodeContent.SYS_DATABASE.contains(command.getDatabase());
+        if (isSysTable) {
+            // 系统表
+            return new SysProviderInterface(command.getDatabase(), command.getTable(), mysqlServiceHandler);
+        } else {
+            return handler.makeNode(command);
+        }
     }
 
     private static byte[] toBytes(double value) {

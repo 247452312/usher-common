@@ -1,6 +1,5 @@
 package top.uhyils.usher.mysql.pojo.sys;
 
-import com.alibaba.fastjson.JSONArray;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +21,6 @@ public class MDual extends AbstractSysTable {
 
     @Override
     public NodeInvokeResult doGetResultNoParams() {
-        return NodeInvokeResult.build(new ArrayList<>(), new JSONArray(), null);
+        return NodeInvokeResult.build(new ArrayList<>(), new ArrayList<>(), null);
     }
 }

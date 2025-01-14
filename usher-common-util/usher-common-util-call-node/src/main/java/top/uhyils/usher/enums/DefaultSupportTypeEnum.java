@@ -6,6 +6,7 @@ package top.uhyils.usher.enums;
  */
 public enum DefaultSupportTypeEnum {
     HTTP("HTTP", "HTTP"),
+    SQL("SQL", "SQL"),
     ;
 
     private final String type;

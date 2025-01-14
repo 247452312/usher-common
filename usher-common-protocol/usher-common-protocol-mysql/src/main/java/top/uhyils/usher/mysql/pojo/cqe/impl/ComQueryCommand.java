@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.exception.AssertException;
 import top.uhyils.usher.handler.NodeHandler;
 import top.uhyils.usher.mysql.enums.MysqlCommandTypeEnum;
@@ -16,7 +15,7 @@ import top.uhyils.usher.mysql.pojo.response.MysqlResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.ErrResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.OkResponse;
 import top.uhyils.usher.mysql.pojo.response.impl.ResultSetResponse;
-import top.uhyils.usher.mysql.pojo.sys.SysProviderInterface;
+import top.uhyils.usher.mysql.util.MysqlUtil;
 import top.uhyils.usher.mysql.util.Proto;
 import top.uhyils.usher.node.call.CallNode;
 import top.uhyils.usher.plan.SqlPlan;
@@ -97,15 +96,8 @@ public class ComQueryCommand extends MysqlSqlCommand {
         NodeInvokeResult execute;
         try {
             execute = PlanUtil.execute(sqlPlans, new HashMap<>(), new JSONObject(), command -> {
-                boolean isSysTable = CallNodeContent.SYS_DATABASE.contains(command.getDatabase());
-                if (isSysTable) {
-                    // 系统表
-                    SysProviderInterface providerInterface = new SysProviderInterface(command.getDatabase(), command.getTable(), mysqlServiceHandler);
-                    return providerInterface.getResult(command.getHeader(), command.getParams());
-                } else {
-                    CallNode callNode = handler.makeNode(command);
-                    return callNode.call(command.getHeader(), command.getParams());
-                }
+                CallNode callNode = MysqlUtil.parseCallNode(command, mysqlServiceHandler, handler);
+                return callNode.call(command.getHeader(), command.getParams());
             });
         } catch (AssertException e) {
             LogUtil.error(this, e, "sql:" + sql + "\n");

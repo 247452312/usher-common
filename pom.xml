@@ -637,7 +637,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9.1</version>
@@ -655,7 +655,7 @@
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.6</version>
                 <configuration>
-                    <!-- 改成你自己的路径 -->
+                    &lt;!&ndash; 改成你自己的路径 &ndash;&gt;
                     <executable>C:/Program Files (x86)/GnuPG/bin/gpg.exe</executable>
                 </configuration>
                 <executions>
@@ -668,7 +668,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- 发布插件 -->
+            &lt;!&ndash; 发布插件 &ndash;&gt;
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -677,12 +677,12 @@
                 <configuration>
                     <publishingServerId>usher</publishingServerId>
                     <tokenAuth>true</tokenAuth>
-                    <!-- 若要自动发布，添加以下配置 -->
+                    &lt;!&ndash; 若要自动发布，添加以下配置 &ndash;&gt;
                     <autoPublish>true</autoPublish>
-                    <!-- 一直等到发布完成 -->
+                    &lt;!&ndash; 一直等到发布完成 &ndash;&gt;
                     <waitUntil>published</waitUntil>
                 </configuration>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
     <profiles>

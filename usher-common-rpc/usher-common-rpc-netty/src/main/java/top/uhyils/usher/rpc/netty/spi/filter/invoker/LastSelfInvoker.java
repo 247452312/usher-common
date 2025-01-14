@@ -53,8 +53,7 @@ public class LastSelfInvoker implements RpcInvoker {
                     return null;
                 }
             }).toArray(Class[]::new);
-            Method declaredMethod = realClass.getDeclaredMethod(methodName, classes);
-            declaredMethod.setAccessible(false);
+            Method declaredMethod = realClass.getMethod(methodName, classes);
             result = declaredMethod.invoke(service, content.getArgs());
         } catch (Exception e) {
             LogUtil.error(this, e);

@@ -15,7 +15,7 @@ import top.uhyils.usher.util.LogUtil;
  * @author uhyils <247452312@qq.com>
  * @date 文件创建日期 2025年01月10日 09时44分
  */
-public class LeafNodeFactory {
+public class NodeFactory {
 
     private static Map<String, BiFunction<SqlInvokeCommand, TableInfo, CallNode>> NODE_BUILD_MAP = new HashMap<>();
 
@@ -32,9 +32,20 @@ public class LeafNodeFactory {
      *
      * @return
      */
-    public static CallNode makeLeafNode(SqlInvokeCommand invokeCommand, TableInfo tableInfo) {
+    public static CallNode makeNode(SqlInvokeCommand invokeCommand, TableInfo tableInfo) {
         Asserts.assertTrue(NODE_BUILD_MAP.containsKey(tableInfo.getType()), "不支持的节点类型:{}", tableInfo.getType());
         return NODE_BUILD_MAP.get(tableInfo.getType()).apply(invokeCommand, tableInfo);
+    }
+
+    /**
+     * 根据提前设置好的方式进行一个构的建
+     *
+     * @param tableInfo
+     *
+     * @return
+     */
+    public static CallNode makeNode(TableInfo tableInfo) {
+        return makeNode(null, tableInfo);
     }
 
     /**

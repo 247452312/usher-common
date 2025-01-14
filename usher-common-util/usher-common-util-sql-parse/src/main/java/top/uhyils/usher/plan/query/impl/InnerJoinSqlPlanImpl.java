@@ -1,8 +1,8 @@
 package top.uhyils.usher.plan.query.impl;
 
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import top.uhyils.usher.plan.query.InnerJoinSqlPlan;
@@ -29,15 +29,15 @@ public class InnerJoinSqlPlanImpl extends InnerJoinSqlPlan {
         // on里的条件
         List<List<SQLBinaryOpExpr>> lists = splitCondition();
 
-        JSONArray leftResults = this.leftResult.getResult();
-        JSONArray rightResults = this.rightResult.getResult();
+        List<Map<String, Object>> leftResults = this.leftResult.getResult();
+        List<Map<String, Object>> rightResults = this.rightResult.getResult();
 
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         String leftAlias = leftTree.getTableSource().getAlias();
         String rightAlias = rightTree.getTableSource().getAlias();
 
-        List<Object> leftCopy = CollectionUtil.copyList(leftResults);
-        List<Object> rightCopy = CollectionUtil.copyList(rightResults);
+        List<Map<String, Object>> leftCopy = CollectionUtil.copyList(leftResults);
+        List<Map<String, Object>> rightCopy = CollectionUtil.copyList(rightResults);
 
         for (Object rightResult : rightResults) {
             JSONObject jsonRightResult = (JSONObject) rightResult;

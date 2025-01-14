@@ -1,7 +1,6 @@
 package top.uhyils.usher.mysql.enums;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,8 +46,8 @@ public enum MysqlMethodEnum {
             return null;
         } else {
             // count中为字段名称
-            JSONArray result = parentInvokeResult.getResult();
-            long size = result.stream().filter(t -> ((JSONObject) t).containsKey(fieldName) && ((JSONObject) t).get(fieldName) != null).count();
+            List<Map<String, Object>> result = parentInvokeResult.getResult();
+            long size = result.stream().filter(t -> t.containsKey(fieldName) && t.get(fieldName) != null).count();
             List<Map<String, Object>> maps = new ArrayList<>();
             Map<String, Object> e = new HashMap<>();
             e.put(fieldName, size);
@@ -140,7 +139,7 @@ public enum MysqlMethodEnum {
             return null;
         } else {
             // count中为字段名称
-            JSONArray result = parentInvokeResult.getResult();
+            List<Map<String, Object>> result = parentInvokeResult.getResult();
             long sum = result.stream().map(t -> (JSONObject) t).filter(t -> t.containsKey(fieldName) && t.get(fieldName) != null).mapToLong(t -> (long) t.get(fieldName)).sum();
             List<Map<String, Object>> maps = new ArrayList<>();
             Map<String, Object> item = new HashMap<>();
@@ -196,7 +195,7 @@ public enum MysqlMethodEnum {
         return maps;
     }),
     GROUP_CONCAT("group_concat", 1, String.class, true, (lastAllPlanResult, parentInvokeResult, arguments, fieldName) -> {
-        JSONArray parentResult = parentInvokeResult.getResult();
+        List<Map<String, Object>> parentResult = parentInvokeResult.getResult();
         List<Map<String, Object>> result = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder();

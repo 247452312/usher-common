@@ -2,7 +2,6 @@ package top.uhyils.usher.plan.query.impl;
 
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
 import java.text.MessageFormat;
@@ -126,7 +125,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
         // 需要从上一个结果中获取的字段
         /*1.如果结果列只有一个* 则直接返回 (如果除了*还有其他的 则报错)*/
         List<FieldInfo> lastFieldInfos = this.lastQueryPlanResult.getFieldInfos();
-        JSONArray lastResult = this.lastQueryPlanResult.getResult();
+        List<Map<String, Object>> lastResult = this.lastQueryPlanResult.getResult();
         // 只允许有一个*
         if (selectList.stream().map(t1 -> t1.getExpr().toString()).collect(Collectors.toList()).contains("*")) {
             if (selectList.size() != 1) {
@@ -136,7 +135,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
         }
 
         List<FieldInfo> newFieldInfo = new ArrayList<>();
-        JSONArray newResultList = new JSONArray();
+        List<Map<String, Object>> newResultList = new ArrayList<>();
 
         for (UsherSQLSelectItem needField : selectList) {
             String needFieldStr = needField.getExpr().toString();
@@ -176,7 +175,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 Asserts.assertTrue(specialLastFieldInfos != null && specialLastFieldInfos.size() == 1, "映射时需要有且仅有一个字段来映射");
                 FieldInfo fieldInfo = dealLastFieldInfo(newFieldInfo, specialLastFieldInfos.get(0), finalName);
                 newFieldInfo.add(fieldInfo);
-                JSONArray result = nodeInvokeResult.getResult();
+                List<Map<String, Object>> result = nodeInvokeResult.getResult();
                 Object needFieldResult = null;
                 if (CollectionUtil.isNotEmpty(result)) {
                     Map<String, Object> stringObjectMap = (Map<String, Object>) result.get(0);
@@ -226,7 +225,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 newFieldInfo.add(fieldInfo);
 
                 for (int i = 0; i < lastResult.size(); i++) {
-                    Object o = ((JSONObject) lastResult.get(i)).get(lastFieldInfo.getFieldName());
+                    Object o = lastResult.get(i).get(lastFieldInfo.getFieldName());
                     if (newResultList.size() <= i) {
                         newResultList.add(new JSONObject(16));
                     }
@@ -294,7 +293,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 //                Asserts.assertTrue(allowFault, "不允许错误的sql语句, 在有合并意义的语句中不能出现实际行");
 
                 /*获取对应字段的结果*/
-                JSONArray lastResult = this.lastQueryPlanResult.getResult();
+                List<Map<String, Object>> lastResult = this.lastQueryPlanResult.getResult();
                 Object newResult = null;
                 if (CollectionUtil.isNotEmpty(lastResult)) {
                     JSONObject first = (JSONObject) lastResult.get(0);
@@ -309,7 +308,7 @@ public class ResultMappingPlanImpl extends AbstractResultMappingPlan {
                 fieldInfos.add(fieldInfoMap.get(SqlStringUtil.cleanQuotation(needFieldStr)));
             }
         }
-        JSONArray result = new JSONArray();
+        List<Map<String, Object>> result = new ArrayList<>();
         result.add(resultItem);
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(this);
         nodeInvokeResult.setFieldInfos(fieldInfos);

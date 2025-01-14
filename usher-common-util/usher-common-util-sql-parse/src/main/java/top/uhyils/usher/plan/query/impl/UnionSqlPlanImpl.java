@@ -1,6 +1,5 @@
 package top.uhyils.usher.plan.query.impl;
 
-import com.alibaba.fastjson.JSONArray;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ public class UnionSqlPlanImpl extends UnionSqlPlan {
         List<NodeInvokeResult> lastUnionResults = unionPlanIds.stream().map(t -> lastAllPlanResult.get(t)).filter(Objects::nonNull).collect(Collectors.toList());
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(this);
         nodeInvokeResult.setFieldInfos(new ArrayList<>());
-        nodeInvokeResult.setResult(new JSONArray());
+        nodeInvokeResult.setResult(new ArrayList<>());
         if (CollectionUtil.isEmpty(lastUnionResults)) {
             return nodeInvokeResult;
         }

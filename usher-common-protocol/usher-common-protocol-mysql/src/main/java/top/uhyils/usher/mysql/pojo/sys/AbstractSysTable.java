@@ -1,8 +1,7 @@
 package top.uhyils.usher.mysql.pojo.sys;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -35,16 +34,20 @@ public abstract class AbstractSysTable implements SysTable {
             return nodeInvokeResult;
         }
 
-        JSONArray result = nodeInvokeResult.getResult();
-        Iterator<Object> iterator = result.iterator();
+        List<Map<String, Object>> result = nodeInvokeResult.getResult();
+        Iterator<Map<String, Object>> iterator = result.iterator();
         while (iterator.hasNext()) {
-            Object next = iterator.next();
-            JSONObject jsonNext = (JSONObject) next;
+            Map<String, Object> jsonNext = iterator.next();
             boolean pass = true;
             // 遍历条件.筛选
             for (Entry<String, Object> param : params.entrySet()) {
                 Object o = jsonNext.get(param.getKey().toUpperCase());
-                if (!Objects.equals(o, param.getValue())) {
+                if (param.getValue() instanceof List) {
+                    if (!((List<?>) param.getValue()).contains(o)) {
+                        pass = false;
+                        break;
+                    }
+                } else if (!Objects.equals(o, param.getValue())) {
                     pass = false;
                     break;
                 }

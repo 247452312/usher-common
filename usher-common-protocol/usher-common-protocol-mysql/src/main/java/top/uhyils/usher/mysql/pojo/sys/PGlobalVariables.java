@@ -1,9 +1,9 @@
 package top.uhyils.usher.mysql.pojo.sys;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,13 +49,13 @@ public class PGlobalVariables extends AbstractSysTable {
         if (!userOptional.isPresent()) {
             throw Asserts.makeException("未登录");
         }
-        List<Object> variableName = (List) params.get("variable_name");
+        String variableName = (String) params.get("variable_name");
         SqlGlobalVariables variables = handler.findMysqlGlobalVariables();
         JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(variables));
-        JSONArray newResults = new JSONArray();
+        List<Map<String, Object>> newResults = new ArrayList<>();
         jsonObject.entrySet().stream().filter(t -> {
             String key = t.getKey();
-            return MysqlUtil.likeMatching(key, variableName);
+            return MysqlUtil.likeMatching(key, Collections.singletonList(variableName));
         }).forEach(t -> {
             GlobalVariablesInfo globalVariablesInfo = new GlobalVariablesInfo();
             globalVariablesInfo.setVariableName(t.getKey());
@@ -66,10 +66,10 @@ public class PGlobalVariables extends AbstractSysTable {
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(null);
         if (CollectionUtil.isNotEmpty(newResults)) {
             List<Map<String, Object>> tempResults = new ArrayList<>();
-            JSONObject first = newResults.getJSONObject(0);
+            Map<String, Object> first = newResults.get(0);
             Map<String, String> fieldNameMap = first.keySet().stream().collect(Collectors.toMap(t -> t, t -> StringUtil.toUnderline(t).toUpperCase()));
             for (int i = 0; i < newResults.size(); i++) {
-                JSONObject newResult = newResults.getJSONObject(i);
+                Map<String, Object> newResult = newResults.get(i);
                 Map<String, Object> tempNewResultMap = new HashMap<>(newResult.size());
                 for (Entry<String, Object> newResultItem : newResult.entrySet()) {
                     String key = newResultItem.getKey();

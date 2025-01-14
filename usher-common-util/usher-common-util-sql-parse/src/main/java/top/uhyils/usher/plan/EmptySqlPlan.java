@@ -1,7 +1,6 @@
 package top.uhyils.usher.plan;
 
 
-import com.alibaba.fastjson.JSONArray;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class EmptySqlPlan extends AbstractSqlSqlPlan {
     public NodeInvokeResult invoke(Map<String, String> headers) {
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(this);
         nodeInvokeResult.setFieldInfos(new ArrayList<>());
-        nodeInvokeResult.setResult(new JSONArray());
+        nodeInvokeResult.setResult(new ArrayList<>());
         return nodeInvokeResult;
     }
 }

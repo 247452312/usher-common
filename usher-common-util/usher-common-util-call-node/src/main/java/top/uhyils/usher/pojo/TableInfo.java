@@ -2,7 +2,7 @@ package top.uhyils.usher.pojo;
 
 import java.io.Serializable;
 import top.uhyils.usher.enums.DefaultSupportTypeEnum;
-import top.uhyils.usher.node.LeafNodeFactory;
+import top.uhyils.usher.node.NodeFactory;
 
 /**
  * 根节点对应的实际执行的信息,对外表现为一个数据库表,所以类名为tableInfo
@@ -28,7 +28,7 @@ public class TableInfo implements Serializable {
     private String tableName;
 
     /**
-     * 节点类型{@link DefaultSupportTypeEnum} 因为是字符串类型,所以支持扩展,如果需要扩展,则需要从{@link LeafNodeFactory#addSupportType} 添加自定义的根节点类型以及对应构建方式
+     * 节点类型{@link DefaultSupportTypeEnum} 因为是字符串类型,所以支持扩展,如果需要扩展,则需要从{@link NodeFactory#addSupportType} 添加自定义的根节点类型以及对应构建方式
      */
     private String type;
 

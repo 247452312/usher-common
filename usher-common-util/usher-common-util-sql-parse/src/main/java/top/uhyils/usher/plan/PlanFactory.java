@@ -86,7 +86,4 @@ public class PlanFactory {
         return new UpdateSqlPlanImpl(froms, itemMap, headers, params);
     }
 
-    public static SqlPlan buildUsePlan(String simpleName, Map<String, String> headers) {
-        return null;
-    }
 }

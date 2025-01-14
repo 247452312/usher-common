@@ -251,8 +251,7 @@ public class MysqlInfoNettyHandler extends ChannelInboundHandlerAdapter implemen
                 finalResponse.addAll(mysqlResponse.toByte());
             }
             byte[] bytes = MysqlUtil.mergeListBytes(finalResponse);
-            String responseBytes = MysqlUtil.dump(bytes);
-            LogUtil.debug("mysql回应:\n" + responseBytes);
+            LogUtil.debug(() -> "mysql回应:\n" + MysqlUtil.dump(bytes));
             send(bytes);
         } catch (AssertException ae) {
             throw ae;

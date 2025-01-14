@@ -2,6 +2,7 @@ package top.uhyils.usher.handler;
 
 import top.uhyils.usher.node.call.CallNode;
 import top.uhyils.usher.pojo.SqlInvokeCommand;
+import top.uhyils.usher.pojo.TableInfo;
 
 /**
  * mysql这一层需要的service
@@ -20,4 +21,14 @@ public interface NodeHandler {
      * @return
      */
     CallNode makeNode(SqlInvokeCommand build);
+
+
+    /**
+     * 获取节点信息
+     *
+     * @param build
+     *
+     * @return
+     */
+    TableInfo findInfo(SqlInvokeCommand build);
 }

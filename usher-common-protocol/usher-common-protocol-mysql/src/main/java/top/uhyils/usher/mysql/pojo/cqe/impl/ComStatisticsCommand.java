@@ -1,10 +1,10 @@
 package top.uhyils.usher.mysql.pojo.cqe.impl;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import top.uhyils.usher.enums.FieldTypeEnum;
 import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.enums.FieldMarkEnum;
@@ -52,7 +52,7 @@ public class ComStatisticsCommand extends AbstractMysqlCommand {
             .add(new FieldInfo(root, STATIC_TABLE_NAME, STATIC_TABLE_NAME, "每秒执行次数", "executions_per_second", 3, (int) mysqlTcpLink.index(), FieldTypeEnum.FIELD_TYPE_LONG, FieldMarkEnum.ZEROFILL_FLAG
                 .getCode(), (byte) 3));
 
-        JSONArray jsonArrayObj = new JSONArray(1);
+        List<Map<String, Object>> jsonArrayObj = new ArrayList<>(1);
         JSONObject jsonResult = new JSONObject(2);
         jsonResult.put("time", 0L);
         jsonResult.put("executions_per_second", 0L);

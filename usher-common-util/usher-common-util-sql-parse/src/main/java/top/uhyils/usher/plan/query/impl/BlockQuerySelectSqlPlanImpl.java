@@ -6,7 +6,6 @@ import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
-import com.alibaba.fastjson.JSONArray;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +61,7 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
                 SQLExpr right = sqlBinaryOpExpr.getRight();
 
                 // where两边都不是属性的时候直接忽略
-                if (!(left instanceof SQLIdentifierExpr) && !(right instanceof SQLIdentifierExpr)) {
+                if (!(left instanceof SQLIdentifierExpr) && !(left instanceof SQLPropertyExpr) && !(right instanceof SQLIdentifierExpr)) {
                     // 如果两边不一致,则无结果
                     if (!Objects.equals(left.toString(), right.toString())) {
                         haveResult = false;
@@ -74,6 +73,14 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
                 if (left.toString().startsWith("&")) {
                     ExprParseResultInfo<Object> leftResponseInfo = UsherSqlUtil.parse(left, lastAllPlanResult, lastNodeInvokeResult);
                     leftStr = leftResponseInfo.get().toString();
+                } else if (left instanceof SQLPropertyExpr) {
+                    String paramOwner = ((SQLPropertyExpr) left).getOwnerName();
+                    if (Objects.equals(paramOwner, tableSource.getAlias())) {
+                        leftStr = ((SQLPropertyExpr) left).getName();
+                    } else {
+                        // 这个条件不是这个类的.直接跳过
+                        continue;
+                    }
                 } else {
                     leftStr = left.toString();
                 }
@@ -82,10 +89,10 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
                 if (right instanceof MySqlCharExpr && ((MySqlCharExpr) right).getText().startsWith("&")) {
                     ExprParseResultInfo<Object> rightResponseInfo = UsherSqlUtil.parse(right, lastAllPlanResult, lastNodeInvokeResult);
                     rightObjs.addAll(rightResponseInfo.getListResult());
+                    whereParams.put(leftStr, rightObjs);
                 } else {
-                    rightObjs.add(StringUtil.trimTarget(right.toString(), "'"));
+                    whereParams.put(leftStr, StringUtil.trimTarget(right.toString(), "'"));
                 }
-                whereParams.put(leftStr, rightObjs);
             }
         }
         sqlInvokeCommandBuilder.addArgs(whereParams);
@@ -102,7 +109,7 @@ public class BlockQuerySelectSqlPlanImpl extends BlockQuerySelectSqlPlan {
         NodeInvokeResult nodeInvokeResult = handler.apply(build);
         nodeInvokeResult.setSourcePlan(this);
         if (!haveResult) {
-            nodeInvokeResult.setResult(new JSONArray());
+            nodeInvokeResult.setResult(new ArrayList<>());
         }
 
         // 平铺/展开结果中的json

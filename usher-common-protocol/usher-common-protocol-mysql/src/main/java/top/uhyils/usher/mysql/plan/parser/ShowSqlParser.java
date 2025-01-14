@@ -225,13 +225,16 @@ public class ShowSqlParser implements SqlParser {
     }
 
     private List<SqlPlan> doParse(SQLShowTablesStatement sql, Map<String, String> headers) {
-        CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
-        Asserts.assertTrue(callerUserInfo != null, "No database selected");
-        String database = callerUserInfo.getDatabaseName();
-        Asserts.assertTrue(StringUtil.isNotEmpty(database), "No database selected");
+        String simpleName = sql.getDatabase().getSimpleName();
+        if (StringUtil.isEmpty(simpleName)) {
+            CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
+            Asserts.assertTrue(callerUserInfo != null, "No database selected");
+            simpleName = callerUserInfo.getDatabaseName();
+        }
+        Asserts.assertTrue(StringUtil.isNotEmpty(simpleName), "No database selected");
 
-        StringBuilder transSql = new StringBuilder("select TABLE_NAME as 'Tables_in_" + database + "' from information_schema.`TABLES` where TABLE_SCHEMA = '");
-        transSql.append(database);
+        StringBuilder transSql = new StringBuilder("select TABLE_NAME as 'Tables_in_" + simpleName + "' from information_schema.`TABLES` where TABLE_SCHEMA = '");
+        transSql.append(simpleName);
         transSql.append("'");
 
         return PlanUtil.analysisSqlToPlan(transSql.toString(), headers);

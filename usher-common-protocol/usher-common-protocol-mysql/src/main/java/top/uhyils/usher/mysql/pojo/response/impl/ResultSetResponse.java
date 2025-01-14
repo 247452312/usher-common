@@ -1,12 +1,12 @@
 package top.uhyils.usher.mysql.pojo.response.impl;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import top.uhyils.usher.mysql.content.MysqlContent;
 import top.uhyils.usher.mysql.enums.MysqlServerStatusEnum;
 import top.uhyils.usher.mysql.enums.SqlTypeEnum;
@@ -32,7 +32,7 @@ public class ResultSetResponse extends AbstractMysqlResponse {
     /**
      * 要返回的信息
      */
-    private final JSONArray jsonInfo;
+    private final List<Map<String, Object>> jsonInfo;
 
     /**
      * 数据库状态
@@ -44,11 +44,11 @@ public class ResultSetResponse extends AbstractMysqlResponse {
      */
     private final int warnCount;
 
-    public ResultSetResponse(List<FieldInfo> fields, JSONArray jsonInfo, MysqlServerStatusEnum serverStatus) {
+    public ResultSetResponse(List<FieldInfo> fields, List<Map<String, Object>> jsonInfo, MysqlServerStatusEnum serverStatus) {
         this(fields, jsonInfo, serverStatus, MysqlContent.MYSQL_TCP_INFO.get().warnCount());
     }
 
-    public ResultSetResponse(List<FieldInfo> fields, JSONArray jsonInfo, MysqlServerStatusEnum serverStatus, int warnCount) {
+    public ResultSetResponse(List<FieldInfo> fields, List<Map<String, Object>> jsonInfo, MysqlServerStatusEnum serverStatus, int warnCount) {
         super();
         this.fields = fields;
         this.jsonInfo = jsonInfo;
@@ -56,7 +56,7 @@ public class ResultSetResponse extends AbstractMysqlResponse {
         this.warnCount = warnCount;
     }
 
-    public ResultSetResponse(List<FieldInfo> fields, JSONArray jsonInfo) {
+    public ResultSetResponse(List<FieldInfo> fields, List<Map<String, Object>> jsonInfo) {
         this(fields, jsonInfo, MysqlServerStatusEnum.SERVER_STATUS_NO_BACKSLASH_ESCAPES, MysqlContent.MYSQL_TCP_INFO.get().warnCount());
     }
 
@@ -144,7 +144,7 @@ public class ResultSetResponse extends AbstractMysqlResponse {
         List<byte[]> results = new ArrayList<>();
 
         for (int i = 0; i < jsonInfo.size(); i++) {
-            JSONObject jsonObject = jsonInfo.getJSONObject(i);
+            Map<String, Object> jsonObject = jsonInfo.get(i);
             if (MapUtil.isEmpty(jsonObject)) {
                 continue;
             }
@@ -188,7 +188,7 @@ public class ResultSetResponse extends AbstractMysqlResponse {
             return MysqlUtil.mergeLengthCodedBinary(simpleDateFormat.format(dateValue));
         }
         if (obj instanceof String) {
-            return MysqlUtil.varString((String) obj);
+            return MysqlUtil.mergeLengthCodedBinary((String) obj);
         }
         if (obj instanceof Long) {
             return MysqlUtil.varString(Long.toString((Long) obj));

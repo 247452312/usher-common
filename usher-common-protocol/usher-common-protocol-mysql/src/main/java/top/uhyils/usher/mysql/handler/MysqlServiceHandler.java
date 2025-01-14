@@ -1,7 +1,6 @@
 package top.uhyils.usher.mysql.handler;
 
 import java.util.List;
-import top.uhyils.usher.annotation.NotNull;
 import top.uhyils.usher.mysql.pojo.DTO.CompanyInfo;
 import top.uhyils.usher.mysql.pojo.DTO.TableDTO;
 import top.uhyils.usher.mysql.pojo.cqe.TableQuery;
@@ -9,9 +8,7 @@ import top.uhyils.usher.mysql.pojo.cqe.UserQuery;
 import top.uhyils.usher.mysql.pojo.cqe.impl.MysqlAuthCommand;
 import top.uhyils.usher.mysql.pojo.response.MysqlResponse;
 import top.uhyils.usher.node.DatabaseInfo;
-import top.uhyils.usher.pojo.NodeInvokeResult;
 import top.uhyils.usher.pojo.SqlGlobalVariables;
-import top.uhyils.usher.pojo.SqlInvokeCommand;
 import top.uhyils.usher.pojo.cqe.query.BlackQuery;
 
 /**
@@ -41,24 +38,6 @@ public interface MysqlServiceHandler {
     List<DatabaseInfo> getAllDatabaseInfo(BlackQuery blackQuery);
 
 
-    /**
-     * 执行远程请求
-     *
-     * @param command
-     *
-     * @return
-     */
-    NodeInvokeResult invokeCallNode(SqlInvokeCommand command);
-
-    /**
-     * 执行节点
-     *
-     * @param command
-     *
-     * @return
-     */
-    @NotNull
-    NodeInvokeResult invokeSingleQuerySql(SqlInvokeCommand command);
 
 
     /**
@@ -90,10 +69,10 @@ public interface MysqlServiceHandler {
      * 根据公司id和数据库名查询对应表
      *
      * @param companyId
-     * @param database
+     * @param databases
      *
      * @return
      */
-    List<TableDTO> findTableByCompanyAndDatabase(Long companyId, String database);
+    List<TableDTO> findTableByCompanyAndDatabase(Long companyId, List<String> databases);
 
 }

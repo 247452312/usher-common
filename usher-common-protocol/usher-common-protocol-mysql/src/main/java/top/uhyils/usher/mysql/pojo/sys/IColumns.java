@@ -1,8 +1,8 @@
 package top.uhyils.usher.mysql.pojo.sys;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,9 +44,9 @@ public class IColumns extends AbstractSysTable {
         if (!userOptional.isPresent()) {
             throw Asserts.makeException("未登录");
         }
-        List<TableDTO> callNodeDTOS = handler.findTableByCompanyAndDatabase(userOptional.get().getId(), schemaName);
+        List<TableDTO> callNodeDTOS = handler.findTableByCompanyAndDatabase(userOptional.get().getId(), Collections.singletonList(schemaName));
 
-        JSONArray newResults = new JSONArray();
+        List<Map<String, Object>> newResults = new ArrayList<>();
 
         Set<String> dbSet = new HashSet<>();
         callNodeDTOS.stream().filter(t -> {
@@ -66,10 +66,10 @@ public class IColumns extends AbstractSysTable {
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(null);
         if (CollectionUtil.isNotEmpty(newResults)) {
             List<Map<String, Object>> tempResults = new ArrayList<>();
-            JSONObject first = newResults.getJSONObject(0);
+            Map<String, Object> first = newResults.get(0);
             Map<String, String> fieldNameMap = first.keySet().stream().collect(Collectors.toMap(t -> t, t -> StringUtil.toUnderline(t).toUpperCase()));
             for (int i = 0; i < newResults.size(); i++) {
-                JSONObject newResult = newResults.getJSONObject(i);
+                Map<String, Object> newResult = newResults.get(i);
                 Map<String, Object> tempNewResultMap = new HashMap<>(newResult.size());
                 for (Entry<String, Object> newResultItem : newResult.entrySet()) {
                     String key = newResultItem.getKey();

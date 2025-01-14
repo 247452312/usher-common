@@ -11,6 +11,15 @@ public class IdCommand extends AbstractCommand {
 
     private Long id;
 
+    /**
+     * 快捷创建
+     */
+    public static IdCommand build(Long id) {
+        IdCommand build = new IdCommand();
+        build.id = id;
+        return build;
+    }
+
     public Long getId() {
         return id;
     }

@@ -2,7 +2,9 @@ package top.uhyils.usher.node.call;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import top.uhyils.usher.content.CallNodeContent;
 import top.uhyils.usher.pojo.FieldInfo;
@@ -27,16 +29,22 @@ public abstract class AbstractLeafNode extends AbstractNode {
 
     @NotNull
     protected NodeInvokeResult dealStrResult(String send) {
-        JSONArray result;
+        List<Map<String, Object>> result;
         if (StringUtil.isJson(send)) {
             if (StringUtil.isJsonObject(send)) {
-                result = new JSONArray();
+                result = new ArrayList<>();
                 result.add(JSONObject.parseObject(send));
             } else {
-                result = JSONObject.parseArray(send);
+                JSONArray objects = JSONArray.parseArray(send);
+                result = new ArrayList<>();
+                for (int i = 0; i < objects.size(); i++) {
+                    JSONObject jsonObject = objects.getJSONObject(i);
+                    result.add(jsonObject);
+                }
+
             }
         } else {
-            result = new JSONArray();
+            result = new ArrayList<>();
             JSONObject resultItem = new JSONObject();
             resultItem.put(CallNodeContent.DEFAULT_RESULT_NAME, send);
             result.add(resultItem);

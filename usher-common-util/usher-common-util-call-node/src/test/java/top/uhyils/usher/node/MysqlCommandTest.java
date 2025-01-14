@@ -1,7 +1,6 @@
 package top.uhyils.usher.node;
 
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +63,7 @@ class MysqlCommandTest {
 
     @BeforeAll
     static void beforeAll() {
-        LeafNodeFactory.addSupportType("aaa", (build, tableInfo) -> {
+        NodeFactory.addSupportType("aaa", (build, tableInfo) -> {
 
             String table = build.getTable();
 
@@ -77,7 +76,7 @@ class MysqlCommandTest {
                         List<FieldInfo> fieldInfos = new ArrayList<>();
                         fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "id", "id", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                         fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "name", "name", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
-                        JSONArray result = new JSONArray();
+                        List<Map<String, Object>> result = new ArrayList<>();
                         return NodeInvokeResult.build(fieldInfos, result, null);
                     }
                 };
@@ -92,7 +91,7 @@ class MysqlCommandTest {
                         fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "user_id", "user_id", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                         fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "c_k", "c_k", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                         fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "k", "k", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
-                        JSONArray result = new JSONArray();
+                        List<Map<String, Object>> result = new ArrayList<>();
                         return NodeInvokeResult.build(fieldInfos, result, null);
                     }
                 };
@@ -106,7 +105,7 @@ class MysqlCommandTest {
                         fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "id", "id", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                         fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "name", "name", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                         fieldInfos.add(new FieldInfo(build.getDatabase(), build.getTable(), build.getTable(), "r2", "r2", 0, 2, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
-                        JSONArray result = new JSONArray();
+                        List<Map<String, Object>> result = new ArrayList<>();
                         return NodeInvokeResult.build(fieldInfos, result, null);
                     }
                 };
@@ -121,7 +120,7 @@ class MysqlCommandTest {
                     fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "TABLE_CATALOG", "TABLE_CATALOG", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                     fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "PRIVILEGE_TYPE", "PRIVILEGE_TYPE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
                     fieldInfos.add(new FieldInfo("information_schema", "user_privileges", "user_privileges", "IS_GRANTABLE", "IS_GRANTABLE", 0, 1, FieldTypeEnum.FIELD_TYPE_VARCHAR, (short) 0, (byte) 0));
-                    JSONArray result = new JSONArray();
+                    List<Map<String, Object>> result = new ArrayList<>();
                     return NodeInvokeResult.build(fieldInfos, result, null);
                 }
             };

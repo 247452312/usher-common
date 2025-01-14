@@ -1,7 +1,7 @@
 package top.uhyils.usher.handler.impl;
 
 import top.uhyils.usher.handler.NodeHandler;
-import top.uhyils.usher.node.LeafNodeFactory;
+import top.uhyils.usher.node.NodeFactory;
 import top.uhyils.usher.node.call.CallNode;
 import top.uhyils.usher.pojo.SqlInvokeCommand;
 import top.uhyils.usher.pojo.TableInfo;
@@ -14,10 +14,15 @@ public abstract class AbstractNodeHandler implements NodeHandler {
 
     @Override
     public CallNode makeNode(SqlInvokeCommand build) {
+        TableInfo tableInfo = findInfo(build);
+        return NodeFactory.makeNode(build, tableInfo);
+    }
+
+    @Override
+    public TableInfo findInfo(SqlInvokeCommand build) {
         String database = build.getDatabase();
         String table = build.getTable();
-        TableInfo tableInfo = findByDatabaseAndTable(database, table);
-        return LeafNodeFactory.makeLeafNode(build, tableInfo);
+        return findByDatabaseAndTable(database, table);
     }
 
     /**

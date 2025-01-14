@@ -2,8 +2,8 @@ package top.uhyils.usher.util;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -130,7 +130,7 @@ public final class PlanUtil {
     private static Map<Long, NodeInvokeResult> makeFirstParam(JSONObject params) {
         Map<Long, NodeInvokeResult> planParamMap = new HashMap<>();
 
-        JSONArray jsonArray = new JSONArray();
+        List<Map<String, Object>> jsonArray = new ArrayList<>();
         if (params != null) {
             jsonArray.add(params);
         }
@@ -146,14 +146,14 @@ public final class PlanUtil {
      *
      * @return
      */
-    private static NodeInvokeResult paramsToResult(JSONArray params) {
+    private static NodeInvokeResult paramsToResult(List<Map<String, Object>> params) {
         if (params == null || params.isEmpty()) {
             return new NodeInvokeResult(null);
         }
         NodeInvokeResult nodeInvokeResult = new NodeInvokeResult(null);
 
         LinkedList<FieldInfo> fieldInfos = new LinkedList<>();
-        List<String> fields = params.stream().flatMap(t -> ((JSONObject) t).keySet().stream()).distinct().collect(Collectors.toList());
+        List<String> fields = params.stream().flatMap(t -> t.keySet().stream()).distinct().collect(Collectors.toList());
         JSONObject firstParam = (JSONObject) params.get(0);
         CallerUserInfo callerUserInfo = CallNodeContent.CALLER_INFO.get();
         first:
